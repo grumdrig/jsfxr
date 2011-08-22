@@ -1,8 +1,8 @@
 
-var SQUARE = "square";
-var SAWTOOTH = "sawtooth";
-var SINE = "sine";
-var NOISE = "noise";
+var SQUARE = 0;
+var SAWTOOTH = 1;
+var SINE = 2;
+var NOISE = 3;
 
 
 var masterVolume = 1.0;
@@ -39,7 +39,9 @@ function Params() {
   this.p_arp_speed = 0.0;
   this.p_arp_mod = 0.0;
 
-  this.p_wave_type = SQUARE;
+  this.wave_type = SQUARE;
+
+  this.sound_vol = 1.0;
 }
 
 
@@ -72,7 +74,7 @@ function pickupCoin() {
 
 Params.prototype.laserShoot = function () {
   this.wave_type = rnd(2);
-  if(this.wave_type==2 && rnd(1))
+  if(this.wave_type == SINE && rnd(1))
     this.wave_type = rnd(1);
   this.p_base_freq = 0.5+frnd(0.5);
   this.p_freq_limit = this.p_base_freq-0.2-frnd(0.6);
@@ -111,7 +113,7 @@ Params.prototype.laserShoot = function () {
 };
 
 Params.prototype.explosion = function () {
-  this.wave_type = 3;
+  this.wave_type = NOISE;
   if(rnd(1))
   {
     this.p_base_freq = 0.1+frnd(0.4);
@@ -153,7 +155,7 @@ Params.prototype.explosion = function () {
 
 Params.prototype.powerUp = function () {
   if(rnd(1))
-    this.wave_type = 1;
+    this.wave_type = SAWTOOTH;
   else
     this.p_duty = frnd(0.6);
   if(rnd(1))
@@ -181,9 +183,9 @@ Params.prototype.powerUp = function () {
 
 Params.prototype.hitHurt = function () {
   this.wave_type = rnd(2);
-  if(this.wave_type == 2)
-    this.wave_type = 3;
-  if(this.wave_type == 0)
+  if(this.wave_type == SINE)
+    this.wave_type = NOISE;
+  if(this.wave_type == SQUARE)
     this.p_duty = frnd(0.6);
   this.p_base_freq = 0.2+frnd(0.6);
   this.p_freq_ramp = -0.3-frnd(0.4);
@@ -197,7 +199,7 @@ Params.prototype.hitHurt = function () {
 
 
 Params.prototype.jump = function () {
-  this.wave_type = 0;
+  this.wave_type = SQUARE;
   this.p_duty = frnd(0.6);
   this.p_base_freq = 0.3+frnd(0.3);
   this.p_freq_ramp = 0.1+frnd(0.2);
@@ -213,7 +215,7 @@ Params.prototype.jump = function () {
 
 Params.prototype.blipSelect = function () {
   this.wave_type = rnd(1);
-  if(this.wave_type == 0)
+  if(this.wave_type == SQUARE)
     this.p_duty = frnd(0.6);
   this.p_base_freq = 0.2+frnd(0.4);
   this.p_env_attack = 0.0;
@@ -349,6 +351,7 @@ var generate = function (ps) {
 
   var buffer = [];
 
+
   for(var t = 0; ; ++t) {
 
     // Arpeggio (single)
@@ -389,9 +392,10 @@ var generate = function (ps) {
     }
     if (env_stage == 0)
       env_vol = env_time / env_length[0];
-    if (env_stage == 1)
-      env_vol = 1.0 + Math.pow(1.0 - env_time / env_length[1], 1.0) * 2.0 * ps.p_env_punch;
-    if (env_stage == 2)
+    else if (env_stage == 1)
+      env_vol = 1.0 + Math.pow(1.0 - env_time / env_length[1],
+                               1.0) * 2.0 * ps.p_env_punch;
+    else  // env_stage == 2
       env_vol = 1.0 - env_time / env_length[2];
 
     // Phaser step
@@ -403,7 +407,7 @@ var generate = function (ps) {
       flthp *= flthp_d;
       if (flthp < 0.00001)
         flthp = 0.00001;
-      if (flthp>0.1)
+      if (flthp > 0.1)
         flthp = 0.1;
     }
 
@@ -414,7 +418,7 @@ var generate = function (ps) {
       phase++;
       if (phase >= period) {
         phase %= period;
-        if (ps.wave_type == 3)
+        if (ps.wave_type == NOISE)
           for(var i = 0; i < 32; ++i)
             noise_buffer[i] = Math.random() * 2.0 - 1.0;
       }
@@ -464,8 +468,10 @@ var generate = function (ps) {
 
     sample *= 2.0 * ps.sound_vol;
 
-    if (sample > 1.0) sample = 1.0;
-    if (sample < -1.0) sample = -1.0;
+    // Rescale [-1.0, 1.0) to [0, 256)
+    sample = Math.floor((sample + 1) * 128);
+    if (sample > 255) sample = 255;
+    if (sample < 0) sample = 0;
     buffer.push(sample);
 
     /*
