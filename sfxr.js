@@ -56,6 +56,7 @@ function rnd(max) {
 
 
 Params.prototype.pickupCoin = function () {
+  this.wave_type = NOISE;
   this.p_base_freq = 0.4+frnd(0.5);
   this.p_env_attack = 0.0;
   this.p_env_sustain = frnd(0.1);
@@ -114,44 +115,37 @@ Params.prototype.laserShoot = function () {
 
 Params.prototype.explosion = function () {
   this.wave_type = NOISE;
-  if(rnd(1))
-  {
-    this.p_base_freq = 0.1+frnd(0.4);
-    this.p_freq_ramp = -0.1+frnd(0.4);
-  }
-  else
-  {
-    this.p_base_freq = 0.2+frnd(0.7);
-    this.p_freq_ramp = -0.2-frnd(0.2);
+  if (rnd(1)) {
+    this.p_base_freq = 0.1 + frnd(0.4);
+    this.p_freq_ramp = -0.1 + frnd(0.4);
+  } else {
+    this.p_base_freq = 0.2 + frnd(0.7);
+    this.p_freq_ramp = -0.2 - frnd(0.2);
   }
   this.p_base_freq *= this.p_base_freq;
-  if(rnd(4) ==0)
+  if (rnd(4) == 0)
     this.p_freq_ramp = 0.0;
-  if(rnd(2) == 0)
-    this.p_repeat_speed = 0.3+frnd(0.5);
+  if (rnd(2) == 0)
+    this.p_repeat_speed = 0.3 + frnd(0.5);
   this.p_env_attack = 0.0;
-  this.p_env_sustain = 0.1+frnd(0.3);
+  this.p_env_sustain = 0.1 + frnd(0.3);
   this.p_env_decay = frnd(0.5);
-  if(rnd(1) == 0)
-  {
-    this.p_pha_offset = -0.3+frnd(0.9);
+  if (rnd(1) == 0) {
+    this.p_pha_offset = -0.3 + frnd(0.9);
     this.p_pha_ramp = -frnd(0.3);
   }
-  this.p_env_punch = 0.2+frnd(0.6);
-  if(rnd(1))
-  {
+  this.p_env_punch = 0.2 + frnd(0.6);
+  if (rnd(1)) {
     this.p_vib_strength = frnd(0.7);
     this.p_vib_speed = frnd(0.6);
   }
-  if(rnd(2) == 0)
-  {
-    this.p_arp_speed = 0.6+frnd(0.3);
-    this.p_arp_mod = 0.8-frnd(1.6);
+  if (rnd(2) == 0) {
+    this.p_arp_speed = 0.6 + frnd(0.3);
+    this.p_arp_mod = 0.8 - frnd(1.6);
   }
 
   return this;
-}
-
+};
 
 Params.prototype.powerUp = function () {
   if(rnd(1))
@@ -422,7 +416,8 @@ var generate = function (ps) {
           for(var i = 0; i < 32; ++i)
             noise_buffer[i] = Math.random() * 2.0 - 1.0;
       }
-      // base waveform
+
+      // Base waveform
       var fp = phase / period;
       if (ps.wave_type == SQUARE) {
         if (fp < square_duty)
@@ -434,7 +429,7 @@ var generate = function (ps) {
       } else if (ps.wave_type == SINE) {
         sub_sample = Math.sin(fp * 2 * Math.PI);
       } else if (ps.wave_type == NOISE) {
-        sub_sample = noise_buffer[phase*32 / period];
+        sub_sample = noise_buffer[Math.floor(phase * 32 / period)];
       }
 
       // Low-pass filter

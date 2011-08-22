@@ -2,8 +2,21 @@
 <script src="sfxr.js"></script>
 
 <script>
-var audio = new Audio();
-var sound = generate((new Params()).pickupCoin());
-audio.src = sound.dataURI; // set audio source
-audio.play(); // we should hear two tones one on each speaker
+
+function bing(fx) {
+  var audio = new Audio();
+  var sound = generate((new Params())[fx]());
+  audio.src = sound.dataURI; // set audio source
+  audio.play(); // we should hear two tones one on each speaker
+}
 </script>
+
+<button onclick="bing('pickupCoin')">Pickup/coin</button>
+<button onclick="bing('laserShoot')">Laser/shoot</button>
+<button onclick="bing('explosion')">Explosion</button>
+<button onclick="bing('powerUp')">Powerup</button>
+<button onclick="bing('hitHurt')">Hit/hurt</button>
+<button onclick="bing('jump')">Jump</button>
+<button onclick="bing('blipSelect')">Blip/select</button>
+<button onclick="bing('random')">Random</button>
+
