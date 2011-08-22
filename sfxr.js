@@ -56,7 +56,6 @@ function rnd(max) {
 
 
 Params.prototype.pickupCoin = function () {
-  this.wave_type = NOISE;
   this.p_base_freq = 0.4+frnd(0.5);
   this.p_env_attack = 0.0;
   this.p_env_sustain = frnd(0.1);
@@ -220,38 +219,38 @@ Params.prototype.blipSelect = function () {
 }
 
 Params.prototype.random = function () {
-  this.p_base_freq = pow(frnd(2.0)-1.0, 2.0);
+  this.p_base_freq = Math.pow(frnd(2.0)-1.0, 2.0);
   if(rnd(1))
-    this.p_base_freq = pow(frnd(2.0)-1.0, 3.0)+0.5;
+    this.p_base_freq = Math.pow(frnd(2.0)-1.0, 3.0)+0.5;
   this.p_freq_limit = 0.0;
-  this.p_freq_ramp = pow(frnd(2.0)-1.0, 5.0);
+  this.p_freq_ramp = Math.pow(frnd(2.0)-1.0, 5.0);
   if(this.p_base_freq>0.7 && this.p_freq_ramp>0.2)
     this.p_freq_ramp = -this.p_freq_ramp;
   if(this.p_base_freq<0.2 && this.p_freq_ramp<-0.05)
     this.p_freq_ramp = -this.p_freq_ramp;
-  this.p_freq_dramp = pow(frnd(2.0)-1.0, 3.0);
+  this.p_freq_dramp = Math.pow(frnd(2.0)-1.0, 3.0);
   this.p_duty = frnd(2.0)-1.0;
-  this.p_duty_ramp = pow(frnd(2.0)-1.0, 3.0);
-  this.p_vib_strength = pow(frnd(2.0)-1.0, 3.0);
+  this.p_duty_ramp = Math.pow(frnd(2.0)-1.0, 3.0);
+  this.p_vib_strength = Math.pow(frnd(2.0)-1.0, 3.0);
   this.p_vib_speed = frnd(2.0)-1.0;
-  this.p_env_attack = pow(frnd(2.0)-1.0, 3.0);
-  this.p_env_sustain = pow(frnd(2.0)-1.0, 2.0);
+  this.p_env_attack = Math.pow(frnd(2.0)-1.0, 3.0);
+  this.p_env_sustain = Math.pow(frnd(2.0)-1.0, 2.0);
   this.p_env_decay = frnd(2.0)-1.0;
-  this.p_env_punch = pow(frnd(0.8), 2.0);
+  this.p_env_punch = Math.pow(frnd(0.8), 2.0);
   if(this.p_env_attack+this.p_env_sustain+this.p_env_decay<0.2)
   {
     this.p_env_sustain += 0.2 + frnd(0.3);
     this.p_env_decay += 0.2 + frnd(0.3);
   }
   this.p_lpf_resonance = frnd(2.0)-1.0;
-  this.p_lpf_freq = 1.0-pow(frnd(1.0), 3.0);
-  this.p_lpf_ramp = pow(frnd(2.0)-1.0, 3.0);
+  this.p_lpf_freq = 1.0-Math.pow(frnd(1.0), 3.0);
+  this.p_lpf_ramp = Math.pow(frnd(2.0)-1.0, 3.0);
   if(this.p_lpf_freq<0.1 && this.p_lpf_ramp<-0.05)
     this.p_lpf_ramp = -this.p_lpf_ramp;
-  this.p_hpf_freq = pow(frnd(1.0), 5.0);
-  this.p_hpf_ramp = pow(frnd(2.0)-1.0, 5.0);
-  this.p_pha_offset = pow(frnd(2.0)-1.0, 3.0);
-  this.p_pha_ramp = pow(frnd(2.0)-1.0, 3.0);
+  this.p_hpf_freq = Math.pow(frnd(1.0), 5.0);
+  this.p_hpf_ramp = Math.pow(frnd(2.0)-1.0, 5.0);
+  this.p_pha_offset = Math.pow(frnd(2.0)-1.0, 3.0);
+  this.p_pha_ramp = Math.pow(frnd(2.0)-1.0, 3.0);
   this.p_repeat_speed = frnd(2.0)-1.0;
   this.p_arp_speed = frnd(2.0)-1.0;
   this.p_arp_mod = frnd(2.0)-1.0;
@@ -367,7 +366,7 @@ var generate = function (ps) {
     var rfperiod = fperiod;
     if (vib_amp > 0.0) {
       vib_phase += vib_speed;
-      rfperiod = fperiod * (1.0 + sin(vib_phase) * vib_amp);
+      rfperiod = fperiod * (1.0 + Math.sin(vib_phase) * vib_amp);
     }
     period = Math.floor(rfperiod);
     if (period < 8) period = 8;
@@ -430,6 +429,8 @@ var generate = function (ps) {
         sub_sample = Math.sin(fp * 2 * Math.PI);
       } else if (ps.wave_type == NOISE) {
         sub_sample = noise_buffer[Math.floor(phase * 32 / period)];
+      } else {
+        throw new Exception("bad wave type! " + ps.wave_type);
       }
 
       // Low-pass filter
@@ -498,7 +499,10 @@ var generate = function (ps) {
      */
   }
 
-  return new RIFFWAVE(buffer);
+  var wave = new RIFFWAVE();
+  wave.header.sampleRate = 44100;
+  wave.Make(buffer);
+  return wave;
 };
 
 if (typeof exports != 'undefined')  {
