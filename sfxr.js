@@ -1,4 +1,3 @@
-var riffwave = require("./riffwave.js");
 
 var SQUARE = "square";
 var SAWTOOTH = "sawtooth";
@@ -27,8 +26,11 @@ var ps = {
   p_pha_offset: 0,
   p_pha_ramp: 0,
   p_repeat_speed: 0,
-  masterVolume: 1.0
+  p_env_punch: 0,
+  p_wave_type: SQUARE,
 };
+
+var masterVolume = 1.0;
 
 
 var generate = function (ps) {
@@ -62,7 +64,7 @@ var generate = function (ps) {
 
   restart();
 
-  // filter
+  // Filter
   var fltp = 0.0;
   var fltdp = 0.0;
   var fltw = Math.pow(ps.p_lpf_freq, 3.0) * 0.1;
@@ -73,12 +75,12 @@ var generate = function (ps) {
   var flthp = Math.pow(ps.p_hpf_freq, 2.0) * 0.1;
   var flthp_d = 1.0 + ps.p_hpf_ramp * 0.0003;
 
-  // vibrato
+  // Vibrato
   var vib_phase = 0.0;
   var vib_speed = Math.pow(ps.p_vib_speed, 2.0) * 0.01;
   var vib_amp = ps.p_vib_strength * 0.5;
 
-  // envelope
+  // Envelope
   var env_vol = 0.0;
   var env_stage = 0;
   var env_time = 0;
@@ -88,8 +90,7 @@ var generate = function (ps) {
     Math.floor(ps.p_env_decay * ps.p_env_decay * 100000.0)
   ];
 
-
-  // phaser
+  // Phaser
   var phase = 0;
   var fphase = Math.pow(ps.p_pha_offset, 2.0) * 1020.0;
   if (ps.p_pha_offset < 0.0) fphase = -fphase;
@@ -101,18 +102,19 @@ var generate = function (ps) {
   for (var i = 0; i < 1024; ++i)
     phaser_buffer[i] = 0.0;
 
-  // noise
+  // Noise
   var noise_buffer = [];
   for (var i = 0; i < 32; ++i)
     noise_buffer[i] = Math.random() * 2.0 - 1.0;
 
-  // repeat
+  // Repeat
   var rep_time = 0;
   var rep_limit = Math.floor(Math.pow(1.0 - ps.p_repeat_speed, 2.0) * 20000 + 32);
   if (ps.p_repeat_speed == 0.0)
     rep_limit=0;
 
-  // end of initialization
+
+  // ...end of initialization
 
 
   var buffer = [];
@@ -201,7 +203,7 @@ var generate = function (ps) {
         sub_sample = noise_buffer[phase*32 / period];
       }
 
-      // lp filter
+      // Low-pass filter
       var pp = fltp;
       fltw *= fltw_d;
       if (fltw < 0.0) fltw = 0.0;
@@ -215,12 +217,12 @@ var generate = function (ps) {
       }
       fltp += fltdp;
 
-      // hp filter
+      // High-pass filter
       fltphp += fltp - pp;
       fltphp -= fltphp * flthp;
       sub_sample = fltphp;
 
-      // phaser
+      // Phaser
       phaser_buffer[ipp & 1023] = sub_sample;
       sub_sample += phaser_buffer[(ipp - iphase + 1024) & 1023];
       ipp = (ipp + 1) & 1023;
@@ -228,7 +230,7 @@ var generate = function (ps) {
       // final accumulation and envelope application
       sample += sub_sample * env_vol;
     }
-    sample = sample / 8 * ps.masterVolume;
+    sample = sample / 8 * masterVolume;
 
     sample *= 2.0 * ps.sound_vol;
 
@@ -265,7 +267,21 @@ var generate = function (ps) {
      */
   }
 
-  return riffwave.RIFFWAVE(buffer);
+  return new RIFFWAVE(buffer);
 };
 
-generate(ps);
+if (typeof require != "undefined")
+  var RIFFWAVE = require("./riffwave.js").RIFFWAVE;
+
+var sound = generate(ps);
+
+if (typeof require != "undefined") {
+  require("fs").writeFile("./test.wav", sound.wav, function(err) {
+    var sys = require("sys");
+    if(err) {
+      sys.puts(err);
+    } else {
+      sys.puts("The file was saved!");
+    }
+  });
+}

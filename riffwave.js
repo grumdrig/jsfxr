@@ -117,3 +117,6 @@ var RIFFWAVE = function(data) {
 
 }; // end RIFFWAVE
 
+
+if (typeof exports != 'undefined')  // For node.js
+  exports.RIFFWAVE = RIFFWAVE;
