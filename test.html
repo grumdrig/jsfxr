@@ -3,6 +3,7 @@
 
 <script>
 var audio = new Audio();
+var sound = generate((new Params()).pickupCoin());
 audio.src = sound.dataURI; // set audio source
 audio.play(); // we should hear two tones one on each speaker
 </script>
