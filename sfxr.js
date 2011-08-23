@@ -4,6 +4,10 @@ var SAWTOOTH = 1;
 var SINE = 2;
 var NOISE = 3;
 
+var SHAPES = [
+  "square", "sawtooth", "sine", "noise"
+];
+
 // Playback volume
 var masterVolume = 1.0;
 

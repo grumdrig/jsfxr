@@ -18,11 +18,13 @@ var PARAMS;
 function gen(fx) {
   PARAMS = new Params();
   PARAMS[fx]();
+  updateUi();
   play();
 }
 
 function mut() {
   PARAMS.mutate();
+  updateUi();
   play();
 }
 
@@ -33,25 +35,45 @@ function play() {
   audio.play();
 }
 
+function updateUi() {
+  $.each(PARAMS, function (param, value) {
+    if (param == "wave_type") {
+      $("input:radio[value=" + value + "]").prop('checked', true).button("refresh");
+    } else {
+      var id = "#" + param.substring(2);
+      $(id).slider("value", 10000 * value);
+    }
+  });
+}
+    
+
 $(function() {
   $("#radio").buttonset();
+  $("input:radio").change(function (event) {
+    setTimeout(function () {
+      PARAMS.wave_type = event.target.value;
+      play();
+    }, 0);
+  });
   $("button").button();
   $(".slider").slider({
     value: 10000,
     min: 0,
     max: 10000,
-    slide: function(event, ui) {
-      $("#amount").text( "$" + ui.value );
+    change: function(event, ui) {
+      if (event.originalEvent) {
+        setTimeout(function () {
+          PARAMS["p_" + event.target.id] = ui.value / 10000.0;
+          play();
+        }, 0);
+      }
     }
   });
   $(".slider").filter(".signed").
     slider("option", "min", -10000).
     slider("value", 0);
 
-  PARAMS = new Params();
-  PARAMS.pickupCoin();
-  play();
-
+  gen("pickupCoin");
 });
 </script>
 
@@ -59,6 +81,10 @@ $(function() {
 
 button {
   width: 10em;
+}
+
+label {
+  width: 5em;
 }
 
 div, h1 {
@@ -131,13 +157,13 @@ hr {
 <h2>Manual Settings</h2>
 <form>
   <div id="radio">
-    <input type="radio" id="square" name="radio" />
+    <input type="radio" id="square" value=0 name="radio" />
       <label for="square">Square</label>
-    <input type="radio" id="sawtooth" name="radio" checked="checked" />
+    <input type="radio" id="sawtooth" value=1 name="radio" checked="checked" />
       <label for="sawtooth">Sawtooth</label>
-    <input type="radio" id="sine" name="radio" />
+    <input type="radio" id="sine" value=2 name="radio" />
       <label for="sine">Sine</label>
-    <input type="radio" id="noise" name="radio" />
+    <input type="radio" id="noise" value=3 name="radio" />
       <label for="noise">Noise</label>
   </div>
 </form>
@@ -175,7 +201,6 @@ hr {
   <tr><td><div class="signed slider" id="hpf_ramp"></div> <th>High-pass filter cutoff sweep
 </table>
 
-<div id="amount">Slider</div>
 
 </div>
 
