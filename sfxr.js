@@ -56,7 +56,7 @@ function Params() {
   this.p_hpf_ramp = 0.0;     // High-pass filter cutoff sweep (SIGNED)
 
   // Sample parameters
-  this.sound_vol = 1.0;  // TODO: interface
+  this.sound_vol = 0.5;
   this.sample_rate = 44100;
   this.sample_size = 8;
 }
@@ -380,6 +380,12 @@ var generate = function (ps) {
   if (ps.p_repeat_speed == 0.0)
     rep_limit = 0;
 
+  //var gain = 2.0 * Math.log(1 + (Math.E - 1) * ps.sound_vol);
+  var gain = 2.0 * ps.sound_vol;
+  var gain = Math.exp(ps.sound_vol) - 1;
+
+  var num_clipped = 0;
+
   // ...end of initialization. Generate samples.
 
   var buffer = [];
@@ -387,8 +393,6 @@ var generate = function (ps) {
   var sample_sum = 0;
   var num_summed = 0;
   var summands = Math.floor(44100 / ps.sample_rate);
-
-  var num_clipped = 0;
 
   for(var t = 0; ; ++t) {
 
@@ -517,8 +521,7 @@ var generate = function (ps) {
     }
 
     sample = sample / 8 * masterVolume;
-
-    sample *= 2.0 * ps.sound_vol;
+    sample *= gain;
 
     if (ps.sample_size == 8) {
       // Rescale [-1.0, 1.0) to [0, 256)

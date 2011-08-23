@@ -15,11 +15,13 @@
 
 var PARAMS;
 var SOUND;
+var SOUND_VOL = 0.5;
 var SAMPLE_RATE = 44100;
 var SAMPLE_SIZE = 8;
 
 function gen(fx) {
   PARAMS = new Params();
+  PARAMS.sound_vol = SOUND_VOL;
   PARAMS.sample_rate = SAMPLE_RATE;
   PARAMS.sample_size = SAMPLE_SIZE;
   PARAMS[fx]();
@@ -61,7 +63,7 @@ function updateUi() {
       $("#bits input:radio[value=" + value + "]").
         prop('checked', true).button("refresh");
     } else {
-      var id = "#" + param.substring(2);
+      var id = "#" + param;
       $(id).slider("value", 10000 * value);
     }
   });
@@ -91,7 +93,7 @@ $(function() {
     max: 10000,
     change: function(event, ui) {
       if (event.originalEvent) {
-        PARAMS["p_" + event.target.id] = ui.value / 10000.0;
+        PARAMS[event.target.id] = ui.value / 10000.0;
         play();
       }
     }
@@ -106,8 +108,12 @@ $(function() {
 
 <style>
 
-button, p {
+button, p, #sound_vol {
   width: 160px;
+}
+
+#sound_vol {
+  margin-top: 4px;
 }
 
 #shape label {
@@ -218,34 +224,34 @@ hr {
 <br/>
 
 <table>
-  <tr><td><div class="slider" id="env_attack"></div> <th>Attack time
-  <tr><td><div class="slider" id="env_sustain"></div> <th>Sustain time
-  <tr><td><div class="slider" id="env_punch"></div> <th>Sustain punch
-  <tr><td><div class="slider" id="env_decay"></div> <th>Decay time
+  <tr><td><div class="slider" id="p_env_attack"></div> <th>Attack time
+  <tr><td><div class="slider" id="p_env_sustain"></div> <th>Sustain time
+  <tr><td><div class="slider" id="p_env_punch"></div> <th>Sustain punch
+  <tr><td><div class="slider" id="p_env_decay"></div> <th>Decay time
   <tr><td><th><hr>
-  <tr><td><div class="slider" id="base_freq"></div> <th>Start frequency
-  <tr><td><div class="slider" id="freq_limit"></div> <th>Min frequency cutoff
-  <tr><td><div class="signed slider" id="freq_ramp"></div> <th>Slide
-  <tr><td><div class="signed slider" id="freq_dramp"></div> <th>Delta slide
-  <tr><td><div class="slider" id="vib_strength"></div> <th>Vibrato depth
-  <tr><td><div class="slider" id="vib_speed"></div> <th>Vibrato speed
+  <tr><td><div class="slider" id="p_base_freq"></div> <th>Start frequency
+  <tr><td><div class="slider" id="p_freq_limit"></div> <th>Min frequency cutoff
+  <tr><td><div class="signed slider" id="p_freq_ramp"></div> <th>Slide
+  <tr><td><div class="signed slider" id="p_freq_dramp"></div> <th>Delta slide
+  <tr><td><div class="slider" id="p_vib_strength"></div> <th>Vibrato depth
+  <tr><td><div class="slider" id="p_vib_speed"></div> <th>Vibrato speed
   <tr><td><th><hr>                               
-  <tr><td><div class="signed slider" id="arp_mod"></div> <th>Change amount
-  <tr><td><div class="slider" id="arp_speed"></div> <th>Change speed
+  <tr><td><div class="signed slider" id="p_arp_mod"></div> <th>Change amount
+  <tr><td><div class="slider" id="p_arp_speed"></div> <th>Change speed
   <tr><td><th><hr>                               
-  <tr><td><div class="slider" id="duty"></div> <th>Square duty
-  <tr><td><div class="signed slider" id="duty_ramp"></div> <th>Duty sweep
+  <tr><td><div class="slider" id="p_duty"></div> <th>Square duty
+  <tr><td><div class="signed slider" id="p_duty_ramp"></div> <th>Duty sweep
   <tr><td><th><hr>                               
-  <tr><td><div class="slider" id="repeat_speed"></div> <th>Repeat speed
+  <tr><td><div class="slider" id="p_repeat_speed"></div> <th>Repeat speed
   <tr><td><th><hr>                               
-  <tr><td><div class="signed slider" id="pha_offset"></div> <th>Phaser offset
-  <tr><td><div class="signed slider" id="pha_ramp"></div> <th>Phaser sweep
+  <tr><td><div class="signed slider" id="p_pha_offset"></div> <th>Phaser offset
+  <tr><td><div class="signed slider" id="p_pha_ramp"></div> <th>Phaser sweep
   <tr><td><th><hr>                               
-  <tr><td><div class="slider" id="lpf_freq"></div> <th>Low-pass filter cutoff
-  <tr><td><div class="signed slider" id="lpf_ramp"></div> <th>Low-pass filter cutoff sweep
-  <tr><td><div class="slider" id="lpf_resonance"></div> <th>Low-pass filter resonance
-  <tr><td><div class="slider" id="hpf_freq"></div> <th>High-pass filter cutoff
-  <tr><td><div class="signed slider" id="hpf_ramp"></div> <th>High-pass filter cutoff sweep
+  <tr><td><div class="slider" id="p_lpf_freq"></div> <th>Low-pass filter cutoff
+  <tr><td><div class="signed slider" id="p_lpf_ramp"></div> <th>Low-pass filter cutoff sweep
+  <tr><td><div class="slider" id="p_lpf_resonance"></div> <th>Low-pass filter resonance
+  <tr><td><div class="slider" id="p_hpf_freq"></div> <th>High-pass filter cutoff
+  <tr><td><div class="signed slider" id="p_hpf_ramp"></div> <th>High-pass filter cutoff sweep
 </table>
 
 
@@ -254,10 +260,20 @@ hr {
 <div>
   <h2>Sound</h2>
   <button onclick="play(true)">Play</button> <br/>
-  <br/>
-  <br/>
+
+  <p>
+  <table id="stats">
+  <tr><th>File size:<td id="file_size">
+  <tr><th>Samples:<td id="num_samples">
+  <tr><th>Clipped:<td id="clipping">
+  </table>
+  </p>
 
 <form>
+  Gain<br/>
+  <div class="slider" id="sound_vol"></div> <br/>
+  <br/>
+
   Sample Rate (Hz) <br/>
   <div id="hz">
     <input type="radio" id="44100" value=44100 name="hz" checked="checked"/>
@@ -282,7 +298,7 @@ hr {
   </div>
 </form>
   
-
+<br/>
   <p>
 To save the sound, right- or control-click the following link, select "Save As...", and choose a name with a ".wav" extension.  <br/>
   <br/>
@@ -290,13 +306,6 @@ To save the sound, right- or control-click the following link, select "Save As..
   <br/>
   (Less tedious solution pending.) </p>
 
-  <p>
-  <table id="stats">
-  <tr><th>File size:<td id="file_size">
-  <tr><th>Samples:<td id="num_samples">
-  <tr><th>Clipped:<td id="clipping">
-  </table>
-  </p>
 
 </div>
 
