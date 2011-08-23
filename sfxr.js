@@ -224,7 +224,34 @@ Params.prototype.blipSelect = function () {
   this.p_env_decay = frnd(0.2);
   this.p_hpf_freq = 0.1;
   return this;
-}
+};
+
+
+Params.prototype.mutate = function () {
+  if (rnd(1)) this.p_base_freq += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_freq_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_freq_dramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_duty += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_duty_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_vib_strength += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_vib_speed += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_vib_delay += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_env_attack += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_env_sustain += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_env_decay += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_env_punch += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_lpf_resonance += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_lpf_freq += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_lpf_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_hpf_freq += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_hpf_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_pha_offset += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_pha_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_repeat_speed += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_arp_speed += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_arp_mod += frnd(0.1) - 0.05;
+};
+
 
 Params.prototype.random = function () {
   this.p_base_freq = Math.pow(frnd(2.0) - 1.0, 2.0);

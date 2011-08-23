@@ -12,11 +12,22 @@
 <script type="text/javascript" src="jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
 
 <script>
-function gen(fx) {
-  var params = new Params();
-  params[fx]();
-  var sound = generate(params);
 
+var PARAMS;
+
+function gen(fx) {
+  PARAMS = new Params();
+  PARAMS[fx]();
+  play();
+}
+
+function mut() {
+  PARAMS.mutate();
+  play();
+}
+
+function play() {
+  var sound = generate(PARAMS);
   var audio = new Audio();
   audio.src = sound.dataURI;
   audio.play();
@@ -36,6 +47,11 @@ $(function() {
   $(".slider").filter(".signed").
     slider("option", "min", -10000).
     slider("value", 0);
+
+  PARAMS = new Params();
+  PARAMS.pickupCoin();
+  play();
+
 });
 </script>
 
@@ -45,8 +61,18 @@ button {
   width: 10em;
 }
 
-div {
+div, h1 {
   display: inline-block;
+}
+
+h1 {
+  padding-right: 1em;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+body {
+  padding-left: 2em;
 }
 
 .slider {
@@ -57,9 +83,8 @@ div {
     font: 10pt Helvetica;
   }
 
-h1 {
-  font-size: 24pt;
-}
+h1 { font-size: 24pt; }
+h2 { font-size: 12pt; }
 
 button, input, label {
   font-size: 10px;
@@ -74,27 +99,36 @@ th {
   text-align: left;
 }
 
+hr {
+  font-size: 3px;
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>SFXR</h1>
+<h1>sfxr</h1>
 
 
 <div>
-<button onclick="gen('pickupCoin')">Pickup/coin</button> <br/>
-<button onclick="gen('laserShoot')">Laser/shoot</button> <br/>
-<button onclick="gen('explosion')">Explosion</button> <br/>
-<button onclick="gen('powerUp')">Powerup</button> <br/>
-<button onclick="gen('hitHurt')">Hit/hurt</button> <br/>
-<button onclick="gen('jump')">Jump</button> <br/>
-<button onclick="gen('blipSelect')">Blip/select</button> <br/>
-<button onclick="gen('random')">Random</button> <br/>
+  <h2>Generator</h2>
+  <button onclick="gen('pickupCoin')">Pickup/coin</button> <br/>
+  <button onclick="gen('laserShoot')">Laser/shoot</button> <br/>
+  <button onclick="gen('explosion')">Explosion</button> <br/>
+  <button onclick="gen('powerUp')">Powerup</button> <br/>
+  <button onclick="gen('hitHurt')">Hit/hurt</button> <br/>
+  <button onclick="gen('jump')">Jump</button> <br/>
+  <button onclick="gen('blipSelect')">Blip/select</button> <br/>
+  <button onclick="gen('random')">Random</button> <br/>
+  <br/>
+  <br/>
+  <br/>
+  <button onclick="mut()">Mutate</button> <br/>
 </div>
 
 <div class="demo">
-
+<h2>Manual Settings</h2>
 <form>
   <div id="radio">
     <input type="radio" id="square" name="radio" />
@@ -115,25 +149,25 @@ th {
   <tr><td><div class="slider" id="env_sustain"></div> <th>Sustain time
   <tr><td><div class="slider" id="env_punch"></div> <th>Sustain punch
   <tr><td><div class="slider" id="env_decay"></div> <th>Decay time
-  <tr><td>&nbsp;                               
+  <tr><td><th><hr>
   <tr><td><div class="slider" id="base_freq"></div> <th>Start frequency
   <tr><td><div class="slider" id="freq_limit"></div> <th>Min frequency cutoff
   <tr><td><div class="signed slider" id="freq_ramp"></div> <th>Slide
   <tr><td><div class="signed slider" id="freq_dramp"></div> <th>Delta slide
   <tr><td><div class="slider" id="vib_strength"></div> <th>Vibrato depth
   <tr><td><div class="slider" id="vib_speed"></div> <th>Vibrato speed
-  <tr><td>&nbsp;                               
+  <tr><td><th><hr>                               
   <tr><td><div class="signed slider" id="arp_mod"></div> <th>Change amount
   <tr><td><div class="slider" id="arp_speed"></div> <th>Change speed
-  <tr><td>&nbsp;                               
+  <tr><td><th><hr>                               
   <tr><td><div class="slider" id="duty"></div> <th>Square duty
   <tr><td><div class="signed slider" id="duty_ramp"></div> <th>Duty sweep
-  <tr><td>&nbsp;                               
+  <tr><td><th><hr>                               
   <tr><td><div class="slider" id="repeat_speed"></div> <th>Repeat speed
-  <tr><td>&nbsp;                               
+  <tr><td><th><hr>                               
   <tr><td><div class="signed slider" id="pha_offset"></div> <th>Phaser offset
   <tr><td><div class="signed slider" id="pha_ramp"></div> <th>Phaser sweep
-  <tr><td>&nbsp;                               
+  <tr><td><th><hr>                               
   <tr><td><div class="slider" id="lpf_freq"></div> <th>Low-pass filter cutoff
   <tr><td><div class="signed slider" id="lpf_ramp"></div> <th>Low-pass filter cutoff sweep
   <tr><td><div class="slider" id="lpf_resonance"></div> <th>Low-pass filter resonance
@@ -143,6 +177,11 @@ th {
 
 <div id="amount">Slider</div>
 
+</div>
+
+<div>
+  <h2>Sound</h2>
+  <button onclick="play()">Play</button> <br/>
 </div>
 
 </div>
