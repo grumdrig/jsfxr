@@ -1,6 +1,9 @@
-sfxr.js: A port of sfxr, a basic sound effects generator, to HTML/JavaScript.
+sfxr.js
+=======
+
+A port of sfxr, a simple sound effects generator, to HTML/JavaScript.
 
 See:
-http://www.drpetter.se/project_sfxr.html
-http://www.codebase.es/riffwave/
-http://thirdcog.eu/apps/cfxrUse
+- http://www.drpetter.se/project_sfxr.html
+- http://www.codebase.es/riffwave/
+- http://thirdcog.eu/apps/cfxrUse
