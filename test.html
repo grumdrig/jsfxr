@@ -29,10 +29,13 @@ function mut() {
 }
 
 function play() {
-  var sound = generate(PARAMS);
-  var audio = new Audio();
-  audio.src = sound.dataURI;
-  audio.play();
+  setTimeout(function () { 
+    var sound = generate(PARAMS);
+    var audio = new Audio();
+    audio.src = sound.dataURI;
+    //? doesn't work... audio.onended = function (event) { console.log("ended " + event); };
+    audio.play(); 
+  }, 0);
 }
 
 function updateUi() {
@@ -50,10 +53,8 @@ function updateUi() {
 $(function() {
   $("#radio").buttonset();
   $("input:radio").change(function (event) {
-    setTimeout(function () {
-      PARAMS.wave_type = event.target.value;
-      play();
-    }, 0);
+    PARAMS.wave_type = event.target.value;
+    play();
   });
   $("button").button();
   $(".slider").slider({
@@ -62,10 +63,8 @@ $(function() {
     max: 10000,
     change: function(event, ui) {
       if (event.originalEvent) {
-        setTimeout(function () {
-          PARAMS["p_" + event.target.id] = ui.value / 10000.0;
-          play();
-        }, 0);
+        PARAMS["p_" + event.target.id] = ui.value / 10000.0;
+        play();
       }
     }
   });
