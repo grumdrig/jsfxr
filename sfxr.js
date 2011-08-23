@@ -55,8 +55,10 @@ function Params() {
   this.p_hpf_freq = 0.0;     // High-pass filter cutoff
   this.p_hpf_ramp = 0.0;     // High-pass filter cutoff sweep (SIGNED)
 
-  // Sample volume
-  this.sound_vol = 1.0;
+  // Sample parameters
+  this.sound_vol = 1.0;  // TODO: interface
+  this.sample_rate = 44100;
+  this.sample_size = 8;
 }
 
 
@@ -501,15 +503,25 @@ var generate = function (ps) {
 
     sample *= 2.0 * ps.sound_vol;
 
-    // Rescale [-1.0, 1.0) to [0, 256)
-    sample = Math.floor((sample + 1) * 128);
-    if (sample > 255) sample = 255;
-    if (sample < 0) sample = 0;
-    buffer.push(sample);
+    if (ps.sample_size == 8) {
+      // Rescale [-1.0, 1.0) to [0, 256)
+      sample = Math.floor((sample + 1) * 128);
+      if (sample > 255) sample = 255;
+      if (sample < 0) sample = 0;
+      buffer.push(sample);
+    } else {
+      // Rescale [-1.0, 1.0) to [-32768, 32768)
+      sample = Math.floor(sample * (1<<15));
+      if (sample >= (1<<15)) sample = (1 << 15)-1;
+      if (sample < -(1<<15)) sample = -(1 << 15);
+      buffer.push(sample & 0xFF);
+      buffer.push((sample >> 8) & 0xFF);
+    }
   }
 
   var wave = new RIFFWAVE();
-  wave.header.sampleRate = 44100;
+  wave.header.sampleRate = ps.sample_rate;
+  wave.header.bitsPerSample = ps.sample_size;
   wave.Make(buffer);
   return wave;
 };

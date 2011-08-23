@@ -14,6 +14,7 @@
 <script>
 
 var PARAMS;
+var SOUND;
 
 function gen(fx) {
   PARAMS = new Params();
@@ -28,12 +29,13 @@ function mut() {
   play();
 }
 
-function play() {
+function play(noregen) {
   setTimeout(function () { 
-    var sound = generate(PARAMS);
     var audio = new Audio();
-    audio.src = sound.dataURI;
-    //? doesn't work... audio.onended = function (event) { console.log("ended " + event); };
+    if (!noregen) 
+      SOUND = generate(PARAMS);
+    audio.src = SOUND.dataURI;
+    $("#wav").attr("href", SOUND.dataURI);
     audio.play(); 
   }, 0);
 }
@@ -51,9 +53,19 @@ function updateUi() {
     
 
 $(function() {
-  $("#radio").buttonset();
-  $("input:radio").change(function (event) {
+  $("#shape").buttonset();
+  $("#hz").buttonset();
+  $("#bits").buttonset();
+  $("#shape input:radio").change(function (event) {
     PARAMS.wave_type = event.target.value;
+    play();
+  });
+  $("#hz input:radio").change(function (event) {
+    PARAMS.sample_rate = event.target.value;
+    play();
+  });
+  $("#bits input:radio").change(function (event) {
+    PARAMS.sample_size = event.target.value;
     play();
   });
   $("button").button();
@@ -78,12 +90,20 @@ $(function() {
 
 <style>
 
-button {
-  width: 10em;
+button, p {
+  width: 160px;
 }
 
-label {
-  width: 5em;
+#shape label {
+  width: 80px;
+}
+
+#hz label {
+  width: 40px;
+}
+
+#bits label {
+  width: 80px;
 }
 
 div, h1 {
@@ -128,6 +148,10 @@ hr {
   font-size: 3px;
 }
 
+#demo-frame > div.demo { padding: 10px !important; }
+
+</script>
+
 </style>
 </head>
 
@@ -155,14 +179,14 @@ hr {
 <div class="demo">
 <h2>Manual Settings</h2>
 <form>
-  <div id="radio">
-    <input type="radio" id="square" value=0 name="radio" />
+  <div id="shape">
+    <input type="radio" id="square" value=0 name="shape" />
       <label for="square">Square</label>
-    <input type="radio" id="sawtooth" value=1 name="radio" checked="checked" />
+    <input type="radio" id="sawtooth" value=1 name="shape" checked="checked" />
       <label for="sawtooth">Sawtooth</label>
-    <input type="radio" id="sine" value=2 name="radio" />
+    <input type="radio" id="sine" value=2 name="shape" />
       <label for="sine">Sine</label>
-    <input type="radio" id="noise" value=3 name="radio" />
+    <input type="radio" id="noise" value=3 name="shape" />
       <label for="noise">Noise</label>
   </div>
 </form>
@@ -205,13 +229,53 @@ hr {
 
 <div>
   <h2>Sound</h2>
-  <button onclick="play()">Play</button> <br/>
+  <button onclick="play(true)">Play</button> <br/>
+  <br/>
+  <br/>
+
+<form>
+  Sample Rate (Hz) <br/>
+  <div id="hz">
+    <input type="radio" id="44100" value=44100 name="hz" checked="checked"/>
+      <label for="44100">44k</label>
+    <input type="radio" id="22050" value=22050 name="hz" />
+      <label for="22050">22k</label>
+    <input type="radio" id="11025" value=11025 name="hz" />
+      <label for="11025">11k</label>
+    <input type="radio" id="5512" value=5512 name="hz" />
+      <label for="5512">6k</label>
+  </div>
+
+  <br/>
+  <br/>
+  Sample size
+  <br/>
+  <div id="bits">
+    <input type="radio" id="16" value=16 name="bits"/>
+      <label for="16">16 bit</label>
+    <input type="radio" id="8" value=8 name="bits" checked="checked"/>
+      <label for="8">8 bit</label>
+  </div>
+</form>
+  
+
+  <br/>
+  <br/>
+
+
+  <p>
+To save the sound, right- or control-click the following link, select "Save As...", and choose a name with a ".wav" extension.  <br/>
+  <br/>
+  <a id="wav" name="sound.wav">Sound.wav</a> <br/>
+  <br/>
+  (Less tedious solution pending.) </p>
+  <!--<button onclick="window.open(SOUND.dataURI)">Download</button> <br/>-->
 </div>
 
+<br/>
+
 </div>
 
-<style>
-#demo-frame > div.demo { padding: 10px !important; };
-</style>
 
-</script>
+</body>
+</html>
