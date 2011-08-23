@@ -36,8 +36,13 @@ function mut() {
 function play(noregen) {
   setTimeout(function () { 
     var audio = new Audio();
-    if (!noregen) 
+    if (!noregen) {
       SOUND = generate(PARAMS);
+      $("#file_size").text(Math.round(SOUND.wav.length / 1024) + "kB");
+      $("#num_samples").text(SOUND.header.subChunk2Size / 
+                             (SOUND.header.bitsPerSample >> 3));
+      $("#clipping").text(SOUND.clipping);
+    }
     audio.src = SOUND.dataURI;
     $("#wav").attr("href", SOUND.dataURI);
     audio.play(); 
@@ -135,9 +140,9 @@ body {
   width: 120px;
 }
 
-  * {
-    font: 10pt Helvetica;
-  }
+* {
+  font: 10pt Helvetica;
+}
 
 h1 { font-size: 24pt; }
 h2 { font-size: 12pt; }
@@ -160,6 +165,14 @@ hr {
 }
 
 #demo-frame > div.demo { padding: 10px !important; }
+
+#stats td {
+  text-align: right;
+}
+
+#stats {
+  width: 80%;
+}
 
 </script>
 
@@ -270,17 +283,21 @@ hr {
 </form>
   
 
-  <br/>
-  <br/>
-
-
   <p>
 To save the sound, right- or control-click the following link, select "Save As...", and choose a name with a ".wav" extension.  <br/>
   <br/>
   <a id="wav" name="sound.wav">Sound.wav</a> <br/>
   <br/>
   (Less tedious solution pending.) </p>
-  <!--<button onclick="window.open(SOUND.dataURI)">Download</button> <br/>-->
+
+  <p>
+  <table id="stats">
+  <tr><th>File size:<td id="file_size">
+  <tr><th>Samples:<td id="num_samples">
+  <tr><th>Clipped:<td id="clipping">
+  </table>
+  </p>
+
 </div>
 
 <br/>

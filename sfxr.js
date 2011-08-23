@@ -388,6 +388,8 @@ var generate = function (ps) {
   var num_summed = 0;
   var summands = Math.floor(44100 / ps.sample_rate);
 
+  var num_clipped = 0;
+
   for(var t = 0; ; ++t) {
 
     // Arpeggio (single)
@@ -521,14 +523,24 @@ var generate = function (ps) {
     if (ps.sample_size == 8) {
       // Rescale [-1.0, 1.0) to [0, 256)
       sample = Math.floor((sample + 1) * 128);
-      if (sample > 255) sample = 255;
-      if (sample < 0) sample = 0;
+      if (sample > 255) {
+        sample = 255;
+        ++num_clipped;
+      } else if (sample < 0) {
+        sample = 0;
+        ++num_clipped;
+      }
       buffer.push(sample);
     } else {
       // Rescale [-1.0, 1.0) to [-32768, 32768)
       sample = Math.floor(sample * (1<<15));
-      if (sample >= (1<<15)) sample = (1 << 15)-1;
-      if (sample < -(1<<15)) sample = -(1 << 15);
+      if (sample >= (1<<15)) {
+        sample = (1 << 15)-1;
+        ++num_clipped;
+      } else if (sample < -(1<<15)) {
+        sample = -(1 << 15);
+        ++num_clipped;
+      }
       buffer.push(sample & 0xFF);
       buffer.push((sample >> 8) & 0xFF);
     }
@@ -538,6 +550,7 @@ var generate = function (ps) {
   wave.header.sampleRate = ps.sample_rate;
   wave.header.bitsPerSample = ps.sample_size;
   wave.Make(buffer);
+  wave.clipping = num_clipped;
   return wave;
 };
 
