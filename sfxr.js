@@ -384,6 +384,10 @@ var generate = function (ps) {
 
   var buffer = [];
 
+  var sample_sum = 0;
+  var num_summed = 0;
+  var summands = Math.floor(44100 / ps.sample_rate);
+
   for(var t = 0; ; ++t) {
 
     // Arpeggio (single)
@@ -499,6 +503,17 @@ var generate = function (ps) {
       // final accumulation and envelope application
       sample += sub_sample * env_vol;
     }
+
+    // Accumulate samples appropriately for sample rate
+    sample_sum += sample;
+    if (++num_summed >= summands) {
+      num_summed = 0;
+      sample = sample_sum / summands;
+      sample_sum = 0;
+    } else {
+      continue;
+    }
+
     sample = sample / 8 * masterVolume;
 
     sample *= 2.0 * ps.sound_vol;

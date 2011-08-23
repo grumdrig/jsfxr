@@ -15,9 +15,13 @@
 
 var PARAMS;
 var SOUND;
+var SAMPLE_RATE = 44100;
+var SAMPLE_SIZE = 8;
 
 function gen(fx) {
   PARAMS = new Params();
+  PARAMS.sample_rate = SAMPLE_RATE;
+  PARAMS.sample_size = SAMPLE_SIZE;
   PARAMS[fx]();
   updateUi();
   play();
@@ -43,7 +47,14 @@ function play(noregen) {
 function updateUi() {
   $.each(PARAMS, function (param, value) {
     if (param == "wave_type") {
-      $("input:radio[value=" + value + "]").prop('checked', true).button("refresh");
+      $("#shape input:radio[value=" + value + "]").
+        prop('checked', true).button("refresh");
+    } else if (param == "sample_rate") {
+      $("#hz input:radio[value=" + value + "]").
+        prop('checked', true).button("refresh");
+    } else if (param == "sample_size") {
+      $("#bits input:radio[value=" + value + "]").
+        prop('checked', true).button("refresh");
     } else {
       var id = "#" + param.substring(2);
       $(id).slider("value", 10000 * value);
@@ -61,11 +72,11 @@ $(function() {
     play();
   });
   $("#hz input:radio").change(function (event) {
-    PARAMS.sample_rate = event.target.value;
+    SAMPLE_RATE = PARAMS.sample_rate = event.target.value;
     play();
   });
   $("#bits input:radio").change(function (event) {
-    PARAMS.sample_size = event.target.value;
+    SAMPLE_SIZE = PARAMS.sample_size = event.target.value;
     play();
   });
   $("button").button();
