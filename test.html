@@ -1,22 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>sfxr.js</title>
+
 <script src="riffwave.js"></script>
 <script src="sfxr.js"></script>
 
 <script>
+function gen(fx) {
+  var params = new Params();
+  params[fx]();
+  var sound = generate(params);
 
-function bing(fx) {
   var audio = new Audio();
-  var sound = generate((new Params())[fx]());
-  audio.src = sound.dataURI; // set audio source
-  audio.play(); // we should hear two tones one on each speaker
+  audio.src = sound.dataURI;
+  audio.play();
 }
 </script>
 
-<button onclick="bing('pickupCoin')">Pickup/coin</button>
-<button onclick="bing('laserShoot')">Laser/shoot</button>
-<button onclick="bing('explosion')">Explosion</button>
-<button onclick="bing('powerUp')">Powerup</button>
-<button onclick="bing('hitHurt')">Hit/hurt</button>
-<button onclick="bing('jump')">Jump</button>
-<button onclick="bing('blipSelect')">Blip/select</button>
-<button onclick="bing('random')">Random</button>
+<style>
+  button {
+    display: block;
+  }
+</style>
+</head>
 
+<body>
+<button onclick="gen('pickupCoin')">Pickup/coin</button>
+<button onclick="gen('laserShoot')">Laser/shoot</button>
+<button onclick="gen('explosion')">Explosion</button>
+<button onclick="gen('powerUp')">Powerup</button>
+<button onclick="gen('hitHurt')">Hit/hurt</button>
+<button onclick="gen('jump')">Jump</button>
+<button onclick="gen('blipSelect')">Blip/select</button>
+<button onclick="gen('random')">Random</button>
+
+</body>
+</html>
