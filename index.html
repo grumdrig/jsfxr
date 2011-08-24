@@ -64,7 +64,7 @@ function updateUi() {
         prop('checked', true).button("refresh");
     } else {
       var id = "#" + param;
-      $(id).slider("value", 10000 * value);
+      $(id).slider("value", 1000 * value);
     }
   });
 }
@@ -88,18 +88,18 @@ $(function() {
   });
   $("button").button();
   $(".slider").slider({
-    value: 10000,
+    value: 1000,
     min: 0,
-    max: 10000,
+    max: 1000,
     change: function(event, ui) {
       if (event.originalEvent) {
-        PARAMS[event.target.id] = ui.value / 10000.0;
+        PARAMS[event.target.id] = ui.value / 1000.0;
         play();
       }
     }
   });
   $(".slider").filter(".signed").
-    slider("option", "min", -10000).
+    slider("option", "min", -1000).
     slider("value", 0);
 
   gen("pickupCoin");
