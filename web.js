@@ -6,6 +6,8 @@ var path = require('path');
 
 var port = process.env.PORT || 3000;
 
+var cache = {};
+
 http.createServer(function (request, response) {
                     
   var filePath = '.' + request.url;
@@ -22,6 +24,12 @@ http.createServer(function (request, response) {
     contentType = 'text/css';
     break;
   }
+
+  if (cache.hasOwnProperty(filePath)) {
+    response.writeHead(200, { 'Content-Type': contentType });
+    response.end(cache[filePath], 'utf-8');
+    return;
+  }
   
   path.exists(filePath, function(exists) {
     
@@ -32,12 +40,14 @@ http.createServer(function (request, response) {
           response.end('500 Server error');
         }
         else {
+          console.log("Caching " + filePath);
+
+          cache[filePath] = content;
           response.writeHead(200, { 'Content-Type': contentType });
           response.end(content, 'utf-8');
         }
       });
-    }
-    else {
+    } else {
       response.writeHead(404);
       response.end('404 File not found');
     }
