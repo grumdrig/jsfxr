@@ -19,12 +19,23 @@ var SOUND_VOL = 0.5;
 var SAMPLE_RATE = 44100;
 var SAMPLE_SIZE = 8;
 
+Params.prototype.query = function () {
+  var result = "";
+  var that = this;
+  $.each(this, function (key,value) {
+    if (that.hasOwnProperty(key))
+      result += "&" + key + "=" + value;
+  });
+  return result.substring(1);
+};
+
 function gen(fx) {
   PARAMS = new Params();
   PARAMS.sound_vol = SOUND_VOL;
   PARAMS.sample_rate = SAMPLE_RATE;
   PARAMS.sample_size = SAMPLE_SIZE;
   PARAMS[fx]();
+  $("#wav").text(fx + ".wav");
   updateUi();
   play();
 }
@@ -47,6 +58,7 @@ function play(noregen) {
     }
     audio.src = SOUND.dataURI;
     $("#wav").attr("href", SOUND.dataURI);
+    $("#sfx").attr("href", "sfx.wav?" + PARAMS.query());
     audio.play(); 
   }, 0);
 }
@@ -127,6 +139,11 @@ button, p, #sound_vol {
 #bits label {
   width: 80px;
 }
+
+#wav {
+  font-weight: bold;
+}
+
 
 div {
   display: inline-block;
@@ -271,6 +288,12 @@ a {
   <button onclick="play(true)">Play</button> <br/>
 
   <p>
+To save the sound, right- or control-click the following link and select 
+"Save As..." <br/>
+  <br/>
+  <a id="wav">sfx.wav</a> <br/>
+  <!-- <a id="sfx">sfx.wav</a><br/> -->
+
   <table id="stats">
   <tr><th>File size:<td id="file_size">
   <tr><th>Samples:<td id="num_samples">
@@ -308,26 +331,32 @@ a {
 </form>
   
 <br/>
-  <p>
-To save the sound, right- or control-click the following link, select "Save As...", and choose a name with a ".wav" extension.  <br/>
-  <br/>
-  <a id="wav" name="sound.wav">Sound.wav</a> <br/>
-  <br/>
-  (Less tedious solution pending.) </p>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 
 <hr/>
-
-<p>
-<a href="https://github.com/grumdrig/jsfxr" id="source">source code</a><br/>
-<a href="http://www.drpetter.se/project_sfxr.html" id="original">original</a>
+<p id="links">
+by <a href="http://fredricksen.net/">Eric Fredricksen</a> in 2011
+<br/>
+  <a href="https://github.com/grumdrig/jsfxr" id="source">(Source code)</a>
+<br/>
+  <a href="http://www.drpetter.se/project_sfxr.html" id="original">(Original version)</a>
 </p>
+
 
 
 </div>
 
 <br/>
+<br/>
 
-</div>
+
+<br/>
+
+
 
 
 </body>

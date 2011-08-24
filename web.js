@@ -3,6 +3,7 @@
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
+var sfxr = require('./sfxr');
 
 var port = process.env.PORT || 3000;
 
@@ -14,6 +15,24 @@ http.createServer(function (request, response) {
   if (filePath == './')
     filePath = './index.html';
   
+  var DYNO = "./sfx.wav?";
+
+  if (filePath.indexOf(DYNO) == 0) {
+    var query = filePath.substring(DYNO.length);
+    query = require("querystring").parse(query);
+    var params = new sfxr.Params();
+    for (var k in query)
+      if (query.hasOwnProperty(k))
+        params[k] = query[k];
+    var sfx = sfxr.generate(params);
+    response.writeHead(200, { 
+      'Content-Type': 'audio/wav',
+      'Content-Length': sfx.wav.length
+    });
+    response.end(new Buffer(sfx.wav), 'binary');
+    return;
+  }
+
   var extname = path.extname(filePath);
   var contentType = 'text/html';
   switch (extname) {
@@ -22,6 +41,9 @@ http.createServer(function (request, response) {
     break;
   case '.css':
     contentType = 'text/css';
+    break;
+  case '.png':
+    contentType = 'image/png';
     break;
   }
 
@@ -40,8 +62,6 @@ http.createServer(function (request, response) {
           response.end('500 Server error');
         }
         else {
-          console.log("Caching " + filePath);
-
           cache[filePath] = content;
           response.writeHead(200, { 'Content-Type': contentType });
           response.end(content, 'utf-8');
