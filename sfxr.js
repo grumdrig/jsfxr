@@ -300,8 +300,8 @@ Params.prototype.random = function () {
 
 var generate = function (ps) {
 
-  function restart() {
-    // Restart for looping
+  function repeat() {
+    rep_time = 0;
 
     fperiod = 100.0 / (ps.p_base_freq * ps.p_base_freq + 0.001);
     period = Math.floor(fperiod);
@@ -323,11 +323,12 @@ var generate = function (ps) {
       arp_limit = 0;
   };
 
+  var rep_time;
   var fperiod, period, fmaxperiod;
   var fslide, fdslide;
   var square_duty, square_slide;
   var arp_mod, arp_time, arp_limit;;
-  restart();
+  repeat();  // First time through, this is a bit of a misnomer
 
   // Filter
   var fltp = 0.0;
@@ -374,7 +375,6 @@ var generate = function (ps) {
     noise_buffer[i] = Math.random() * 2.0 - 1.0;
 
   // Repeat
-  var rep_time = 0;
   var rep_limit = Math.floor(Math.pow(1.0 - ps.p_repeat_speed, 2.0) * 20000
                              + 32);
   if (ps.p_repeat_speed == 0.0)
@@ -395,6 +395,9 @@ var generate = function (ps) {
   var summands = Math.floor(44100 / ps.sample_rate);
 
   for(var t = 0; ; ++t) {
+
+    if (rep_limit != 0 && ++rep_time >= rep_limit)
+      repeat();
 
     // Arpeggio (single)
     if(arp_limit != 0 && t >= arp_limit) {
