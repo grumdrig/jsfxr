@@ -396,6 +396,7 @@ var generate = function (ps) {
 
   for(var t = 0; ; ++t) {
 
+    // Repeats
     if (rep_limit != 0 && ++rep_time >= rep_limit)
       repeat();
 
