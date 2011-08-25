@@ -203,11 +203,12 @@ hr {
 
 a {
   text-decoration: none;
+  color: #0000ff;
 }
 
 #uncopy {
   margin-top: -4px;
-  border: solid 1px black;
+  border: solid 1px #0000ff;
   border-radius: 10px;
   width: 8px;
   height: 8px;
@@ -216,6 +217,10 @@ a {
   vertical-align: middle;
   line-height: 6px;
   font-size: 10px;
+}
+
+#generators button {
+  margin-bottom: 2px;
 }
 
 </script>
@@ -229,7 +234,7 @@ a {
 <h1>jsfxr</h1>
 </div>
 
-<div>
+<div id="generators">
   <h2>Generator</h2>
   <button onclick="gen('pickupCoin')">Pickup/coin</button> <br/>
   <button onclick="gen('laserShoot')">Laser/shoot</button> <br/>
@@ -301,8 +306,8 @@ a {
   <button onclick="play(true)">Play</button> <br/>
 
   <p>
-To save the sound, right- or control-click the following link and select 
-"Save As..." <br/>
+To save the sound, right- or control-click the following link, select 
+"Save As..." and choose a name with a ".wav" extension. <br/>
   <br/>
   <a id="wav">sfx.wav</a> <br/>
   <!-- <a id="sfx">sfx.wav</a><br/> -->
