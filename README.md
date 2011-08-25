@@ -3,10 +3,11 @@ jsfxr
 
 Dead easy game sound effects generator.
 
-A port of sfxr http://www.drpetter.se/project_sfxr.html to HTML5.
+A port of [sfxr](http://www.drpetter.se/project_sfxr.html) to HTML5.
 
-Web app:  http://github.grumdrig.com/jsfxr:
-Src code: https://github.com/grumdrig/jsfxr
+App:      http://github.grumdrig.com/jsfxr/
 
-Thanks:   http://www.codebase.es/riffwave/
-Thanks:   http://jqueryui.com/
+Source:   https://github.com/grumdrig/jsfxr/
+
+Using:    http://www.codebase.es/riffwave/
+          http://jqueryui.com/
