@@ -15,7 +15,7 @@
 
 var PARAMS;
 var SOUND;
-var SOUND_VOL = 0.5;
+var SOUND_VOL = 0.25;
 var SAMPLE_RATE = 44100;
 var SAMPLE_SIZE = 8;
 
@@ -63,6 +63,11 @@ function play(noregen) {
   }, 0);
 }
 
+function disenable() {
+  $("#p_duty").slider("option", "disabled", PARAMS.wave_type != SQUARE);
+  $("#p_duty_ramp").slider("option", "disabled", PARAMS.wave_type != SQUARE);
+}
+
 function updateUi() {
   $.each(PARAMS, function (param, value) {
     if (param == "wave_type") {
@@ -79,6 +84,7 @@ function updateUi() {
       $(id).slider("value", 1000 * value);
     }
   });
+  disenable();
 }
     
 
@@ -88,6 +94,7 @@ $(function() {
   $("#bits").buttonset();
   $("#shape input:radio").change(function (event) {
     PARAMS.wave_type = event.target.value;
+    disenable();
     play();
   });
   $("#hz input:radio").change(function (event) {
