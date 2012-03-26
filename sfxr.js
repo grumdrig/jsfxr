@@ -298,6 +298,16 @@ Params.prototype.random = function () {
 // Generate audio waveform according to the parameters thereof
 var generate = function (ps) {
 
+  //
+  // Convert user-facing parameter values to units usable by the sound generator
+  //
+
+  var rep_time;
+  var fperiod, period, fmaxperiod;
+  var fslide, fdslide;
+  var square_duty, square_slide;
+  var arp_mod, arp_time, arp_limit;
+
   function repeat() {
     rep_time = 0;
 
@@ -321,11 +331,6 @@ var generate = function (ps) {
       arp_limit = 0;
   };
 
-  var rep_time;
-  var fperiod, period, fmaxperiod;
-  var fslide, fdslide;
-  var square_duty, square_slide;
-  var arp_mod, arp_time, arp_limit;
   repeat();  // First time through, this is a bit of a misnomer
 
   // Filter
@@ -384,7 +389,9 @@ var generate = function (ps) {
 
   var num_clipped = 0;
 
-  // ...end of initialization. Generate samples.
+  //
+  // End of parameter conversion. Generate samples.
+  //
 
   var buffer = [];
 
@@ -469,6 +476,7 @@ var generate = function (ps) {
 
       // Base waveform
       var fp = phase / period;
+      ps.wave_type = parseInt(ps.wave_type);
       if (ps.wave_type === SQUARE) {
         if (fp < square_duty)
           sub_sample=0.5;
@@ -481,7 +489,7 @@ var generate = function (ps) {
       } else if (ps.wave_type === NOISE) {
         sub_sample = noise_buffer[Math.floor(phase * 32 / period)];
       } else {
-        throw new Exception("bad wave type! " + ps.wave_type);
+        throw "ERROR: Bad wave type: " + ps.wave_type;
       }
 
       // Low-pass filter

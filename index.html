@@ -82,6 +82,7 @@ function updateUi() {
     } else {
       var id = "#" + param;
       $(id).slider("value", 1000 * value);
+      $(id).each(function(){convert(this, PARAMS[this.id]);});
     }
   });
   disenable();
@@ -110,9 +111,13 @@ $(function() {
     value: 1000,
     min: 0,
     max: 1000,
+    slide: function (event, ui) {
+      convert(event.target, ui.value / 1000.0);
+    },
     change: function(event, ui) {
       if (event.originalEvent) {
         PARAMS[event.target.id] = ui.value / 1000.0;
+        convert(event.target, PARAMS[event.target.id]);
         play();
       }
     }
@@ -120,9 +125,61 @@ $(function() {
   $(".slider").filter(".signed").
     slider("option", "min", -1000).
     slider("value", 0);
+  $('.slider').each(function () {
+      var is = this.id;
+      $(this).parent().parent().find('th').append($('<label>', {for: is}));
+    });
+
+  var CONVERSIONS = {
+    p_env_attack:  function (v) { return v * v * 100000.0 },
+    p_env_sustain: function (v) { return v * v * 100000.0 },
+    p_env_punch:   function (v) { return v },
+    p_env_decay:   function (v) { return v * v * 100000.0 },
+    
+    p_base_freq:  function (v) { return 8 * 44100 * (v * v + 0.001) / 100 },
+    p_freq_limit: function (v) { return 8 * 44100 * (v * v + 0.0001) / 100 },
+    p_freq_ramp:  function (v) { return 1.0 - Math.pow(v, 3.0) * 0.01 },
+    p_freq_dramp: function (v) { return -Math.pow(v, 3.0) * 0.000001 },
+
+    p_vib_speed:    function (v) { return Math.pow(v, 2.0) * 0.01 },
+    p_vib_strength: function (v) { return v * 0.5 },
+
+    p_arp_mod:   function (v) { return 1.0 - Math.pow(v, 2.0) * 
+                                (v >= 0 ? 0.9 : 10) },
+    p_arp_speed: function (v) { return (v === 1.0) ? 0 :
+                                Math.floor(Math.pow(1.0 - v, 2.0) * 20000 +32)},
+
+    p_duty:      function (v) {  return 0.5 - v * 0.5;  },
+    p_duty_ramp: function (v) { return -v * 0.00005 },
+
+    p_repeat_speed: function (v) { return (v === 0) ? 0 :
+                                   Math.floor(Math.pow(1-v, 2) * 20000) + 32 },
+
+    p_pha_offset: function (v) { return (v < 0 ? -1 : 1) * Math.pow(v,2)*1020 },
+    p_pha_ramp:   function (v) { return (v < 0 ? -1 : 1) * Math.pow(v,2) },
+
+    p_lpf_freq:   function (v) { return Math.pow(v, 3) * 0.1 },
+    p_lpf_ramp:   function (v) { return 1.0 + v * 0.0001 },
+    p_lpf_resonance: function (v) { return 5.0 / (1.0 + Math.pow(v, 2) * 20) }, // * (0.01 + fltw);
+
+    p_hpf_freq: function (v) { return Math.pow(v, 2) * 0.1 },
+    p_hpf_ramp: function (v) { return 1.0 + v * 0.0003 }
+  };
+  for (var p in CONVERSIONS)
+    $('#' + p)[0].convert = CONVERSIONS[p];
 
   gen("pickupCoin");
 });
+
+function convert(control, v) {
+  if (control.convert) {
+    v = control.convert(v);
+    v = v.toFixed(3);
+    control.convertedValue = v;
+    $('label[for="' + control.id + '"]').text(v);
+  }
+}
+
 </script>
 
 <style>
