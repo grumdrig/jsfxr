@@ -130,6 +130,39 @@ $(function() {
       $(this).parent().parent().find('th').append($('<label>', {for: is}));
     });
 
+  var UNITS = {
+    p_env_attack:  'sec',
+    p_env_sustain: 'sec',
+    p_env_punch:   'sec',
+    p_env_decay:   'sec',
+    
+    p_base_freq:  'Hz',
+    p_freq_limit: 'Hz',
+    p_freq_ramp:  'Hz/t',
+    p_freq_dramp: 'Hz/t',
+
+    p_vib_speed:    'Hz',
+    p_vib_strength: 'x',
+
+    p_arp_mod:   'x',
+    p_arp_speed: function (v) { return (v / 44100).toPrecision(4) +' sec'},
+
+    p_duty:      function (v) { return (100 * v).toPrecision(4) + '%'; },
+    p_duty_ramp: function (v) { return (8 * 44100 * v).toPrecision(4) +'%/sec'},
+
+    p_repeat_speed: 'sec',
+
+    p_pha_offset: '?',
+    p_pha_ramp:   '?/t',
+
+    p_lpf_freq:   'Hz',
+    p_lpf_ramp:   'Hz/t',
+    p_lpf_resonance: '?',
+
+    p_hpf_freq: 'Hz',
+    p_hpf_ramp: 'Hz/t',
+  };
+
   var CONVERSIONS = {
     p_env_attack:  function (v) { return v * v * 100000.0 },
     p_env_sustain: function (v) { return v * v * 100000.0 },
@@ -149,7 +182,7 @@ $(function() {
     p_arp_speed: function (v) { return (v === 1.0) ? 0 :
                                 Math.floor(Math.pow(1.0 - v, 2.0) * 20000 +32)},
 
-    p_duty:      function (v) {  return 0.5 - v * 0.5;  },
+    p_duty:      function (v) { return 0.5 - v * 0.5; },
     p_duty_ramp: function (v) { return -v * 0.00005 },
 
     p_repeat_speed: function (v) { return (v === 0) ? 0 :
@@ -165,8 +198,11 @@ $(function() {
     p_hpf_freq: function (v) { return Math.pow(v, 2) * 0.1 },
     p_hpf_ramp: function (v) { return 1.0 + v * 0.0003 }
   };
-  for (var p in CONVERSIONS)
-    $('#' + p)[0].convert = CONVERSIONS[p];
+  for (var p in CONVERSIONS) {
+    var control = $('#' + p)[0];
+    control.convert = CONVERSIONS[p];
+    control.units = UNITS[p];
+  }
 
   gen("pickupCoin");
 });
@@ -174,8 +210,11 @@ $(function() {
 function convert(control, v) {
   if (control.convert) {
     v = control.convert(v);
-    v = v.toFixed(3);
     control.convertedValue = v;
+    if (typeof control.units === 'function')
+      v = control.units(v);
+    else
+      v = v.toPrecision(4) + ' ' + control.units;
     $('label[for="' + control.id + '"]').text(v);
   }
 }
