@@ -34,7 +34,7 @@ function Params() {
   this.p_arp_mod = 0.0;      // Change amount (SIGNED)
   this.p_arp_speed = 0.0;    // Change speed
 
-  // Duty (wat's that?)
+  // Square wave duty (proportion of time signal is high vs. low)
   this.p_duty = 0.0;         // Square duty
   this.p_duty_ramp = 0.0;    // Duty sweep (SIGNED)
 
@@ -291,6 +291,17 @@ Params.prototype.random = function () {
   this.p_repeat_speed = frnd(2.0) - 1.0;
   this.p_arp_speed = frnd(2.0) - 1.0;
   this.p_arp_mod = frnd(2.0) - 1.0;
+  return this;
+}
+
+
+Params.prototype.tone = function () {
+  this.wave_tuype = SINE;
+  this.p_base_freq = .35173364
+  this.p_env_attack = 0.0;
+  this.p_env_sustain = 1;
+  this.p_env_decay = 0;
+  this.p_env_punch = 0;
   return this;
 }
 

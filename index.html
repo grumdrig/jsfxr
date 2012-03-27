@@ -131,17 +131,17 @@ $(function() {
     });
 
   var UNITS = {
-    p_env_attack:  'sec',
-    p_env_sustain: 'sec',
-    p_env_punch:   'sec',
-    p_env_decay:   'sec',
+    p_env_attack:  function (v) { return (v / 44100).toPrecision(4) + ' sec' },
+    p_env_sustain: function (v) { return (v / 44100).toPrecision(4) + ' sec' },
+    p_env_punch:   function (v) { return '+' + (v * 100).toPrecision(4) + '%'},
+    p_env_decay:   function (v) { return (v / 44100).toPrecision(4) + ' sec' },
     
     p_base_freq:  'Hz',
     p_freq_limit: 'Hz',
     p_freq_ramp:  'Hz/t',
     p_freq_dramp: 'Hz/t',
 
-    p_vib_speed:    'Hz',
+    p_vib_speed:    function (v) { return (441000/64. * v).toPrecision(4) + 'Hz'},
     p_vib_strength: 'x',
 
     p_arp_mod:   'x',
@@ -347,6 +347,7 @@ a {
   <button onclick="gen('jump')">Jump</button> <br/>
   <button onclick="gen('blipSelect')">Blip/select</button> <br/>
   <button onclick="gen('random')">Random</button> <br/>
+  <button onclick="gen('tone')">Tone</button> <br/>
   <br/>
   <br/>
   <br/>
@@ -371,34 +372,37 @@ a {
 <br/>
 
 <table>
+  <tr><th colspan=2>Envelope
   <tr><td><div class="slider" id="p_env_attack"></div> <th>Attack time
   <tr><td><div class="slider" id="p_env_sustain"></div> <th>Sustain time
   <tr><td><div class="slider" id="p_env_punch"></div> <th>Sustain punch
   <tr><td><div class="slider" id="p_env_decay"></div> <th>Decay time
-  <tr><td><th><hr>
+  <tr><th colspan=2>Frequency
   <tr><td><div class="slider" id="p_base_freq"></div> <th>Start frequency
   <tr><td><div class="slider" id="p_freq_limit"></div> <th>Min frequency cutoff
   <tr><td><div class="signed slider" id="p_freq_ramp"></div> <th>Slide
   <tr><td><div class="signed slider" id="p_freq_dramp"></div> <th>Delta slide
-  <tr><td><div class="slider" id="p_vib_strength"></div> <th>Vibrato depth
-  <tr><td><div class="slider" id="p_vib_speed"></div> <th>Vibrato speed
-  <tr><td><th><hr>                               
+  <tr><th colspan=2>Vibrato
+  <tr><td><div class="slider" id="p_vib_strength"></div> <th>Depth
+  <tr><td><div class="slider" id="p_vib_speed"></div> <th>Speed
+  <tr><th colspan=2>Arpeggiation
   <tr><td><div class="signed slider" id="p_arp_mod"></div> <th>Change amount
   <tr><td><div class="slider" id="p_arp_speed"></div> <th>Change speed
-  <tr><td><th><hr>                               
-  <tr><td><div class="slider" id="p_duty"></div> <th>Square duty
-  <tr><td><div class="signed slider" id="p_duty_ramp"></div> <th>Duty sweep
-  <tr><td><th><hr>                               
-  <tr><td><div class="slider" id="p_repeat_speed"></div> <th>Repeat speed
-  <tr><td><th><hr>                               
-  <tr><td><div class="signed slider" id="p_pha_offset"></div> <th>Phaser offset
-  <tr><td><div class="signed slider" id="p_pha_ramp"></div> <th>Phaser sweep
-  <tr><td><th><hr>                               
-  <tr><td><div class="slider" id="p_lpf_freq"></div> <th>Low-pass filter cutoff
-  <tr><td><div class="signed slider" id="p_lpf_ramp"></div> <th>Low-pass filter cutoff sweep
-  <tr><td><div class="slider" id="p_lpf_resonance"></div> <th>Low-pass filter resonance
-  <tr><td><div class="slider" id="p_hpf_freq"></div> <th>High-pass filter cutoff
-  <tr><td><div class="signed slider" id="p_hpf_ramp"></div> <th>High-pass filter cutoff sweep
+  <tr><th colspan=2>Square Wave Duty Cycle                           
+  <tr><td><div class="slider" id="p_duty"></div> <th>Duty cycle
+  <tr><td><div class="signed slider" id="p_duty_ramp"></div> <th>Sweep
+  <tr><th colspan=2>Repeat
+  <tr><td><div class="slider" id="p_repeat_speed"></div> <th>Speed
+  <tr><th colspan=2>Phaser
+  <tr><td><div class="signed slider" id="p_pha_offset"></div> <th>Offset
+  <tr><td><div class="signed slider" id="p_pha_ramp"></div> <th>Sweep
+  <tr><th colspan=2>Low-Pass Filter
+  <tr><td><div class="slider" id="p_lpf_freq"></div> <th>Cutoff
+  <tr><td><div class="signed slider" id="p_lpf_ramp"></div> <th>Cutoff sweep
+  <tr><td><div class="slider" id="p_lpf_resonance"></div> <th>Resonance
+  <tr><th colspan=2>High-Pass Filter
+  <tr><td><div class="slider" id="p_hpf_freq"></div> <th>Cutoff
+  <tr><td><div class="signed slider" id="p_hpf_ramp"></div> <th>Cutoff sweep
 </table>
 
 
