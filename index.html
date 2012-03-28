@@ -141,8 +141,10 @@ $(function() {
     p_freq_ramp:  'Hz/t',
     p_freq_dramp: 'Hz/t',
 
-    p_vib_speed:    function (v) { return (441000/64. * v).toPrecision(4) + 'Hz'},
-    p_vib_strength: 'x',
+    p_vib_speed:    function (v) { return v === 0 ? 'OFF' : 
+                                   (441000/64. * v).toPrecision(4) + ' Hz'},
+    p_vib_strength: function (v) { return v === 0 ? 'OFF' : 
+                                   '&plusmn; ' + (v*100).toPrecision(4) + '%' },
 
     p_arp_mod:   'x',
     p_arp_speed: function (v) { return (v / 44100).toPrecision(4) +' sec'},
@@ -215,7 +217,7 @@ function convert(control, v) {
       v = control.units(v);
     else
       v = v.toPrecision(4) + ' ' + control.units;
-    $('label[for="' + control.id + '"]').text(v);
+    $('label[for="' + control.id + '"]').html(v);
   }
 }
 
