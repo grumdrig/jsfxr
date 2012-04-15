@@ -297,9 +297,9 @@ Params.prototype.random = function () {
 
 Params.prototype.tone = function () {
   this.wave_tuype = SINE;
-  this.p_base_freq = .35173364
+  this.p_base_freq = .35173364;  // 440 Hz
   this.p_env_attack = 0.0;
-  this.p_env_sustain = 1;
+  this.p_env_sustain = 0.6641;  // 1 sec
   this.p_env_decay = 0;
   this.p_env_punch = 0;
   return this;

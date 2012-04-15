@@ -164,7 +164,7 @@ $(function() {
                                  (1000*v/44100).toPrecision(4) + ' msec' },
     // Not so sure about this:
     p_pha_ramp:   function (v) { return v === 0 ? 'OFF' :
-                 (1000*v/44100).toPrecision(4) + ' msec/sec' },
+                 (1000*v).toPrecision(4) + ' msec/sec' },
 
     p_lpf_freq:   'Hz?',
     p_lpf_ramp:   'Hz/t?',
