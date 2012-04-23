@@ -166,12 +166,16 @@ $(function() {
     p_pha_ramp:   function (v) { return v === 0 ? 'OFF' :
                  (1000*v).toPrecision(4) + ' msec/sec' },
 
-    p_lpf_freq:   'Hz?',
-    p_lpf_ramp:   'Hz/t?',
+    p_lpf_freq:   function (v) { 
+      return (v === .1) ? 'OFF' : Math.round(8 * 44100 * v / (1-v)) + ' Hz'; },
+    p_lpf_ramp:  function (v) {  if (v === 1) return 'OFF';
+      return 'x ' + Math.pow(v, 44100).toPrecision(4) + ' /sec'; },
     p_lpf_resonance: '?',
 
-    p_hpf_freq: 'Hz?',
-    p_hpf_ramp: 'Hz/t?',
+    p_hpf_freq:   function (v) { 
+      return (v === 0) ? 'OFF' : Math.round(8 * 44100 * v / (1-v)) + ' Hz'; },
+    p_hpf_ramp: function (v) {  if (v === 1) return 'OFF';
+      return 'x ' + Math.pow(v, 44100).toPrecision(4) + ' /sec'; },
   };
 
   var CONVERSIONS = {
@@ -408,11 +412,11 @@ a {
   <tr><td><div class="signed slider" id="p_pha_offset"></div> <th>Offset
   <tr><td><div class="signed slider" id="p_pha_ramp"></div> <th>Sweep
   <tr><th colspan=2>Low-Pass Filter
-  <tr><td><div class="slider" id="p_lpf_freq"></div> <th>Cutoff
+  <tr><td><div class="slider" id="p_lpf_freq"></div> <th>Cutoff frequency
   <tr><td><div class="signed slider" id="p_lpf_ramp"></div> <th>Cutoff sweep
   <tr><td><div class="slider" id="p_lpf_resonance"></div> <th>Resonance
   <tr><th colspan=2>High-Pass Filter
-  <tr><td><div class="slider" id="p_hpf_freq"></div> <th>Cutoff
+  <tr><td><div class="slider" id="p_hpf_freq"></div> <th>Cutoff frequency
   <tr><td><div class="signed slider" id="p_hpf_ramp"></div> <th>Cutoff sweep
 </table>
 

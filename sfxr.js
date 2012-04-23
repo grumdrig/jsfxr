@@ -473,7 +473,7 @@ var generate = function (ps) {
         flthp = 0.1;
     }
 
-    // 8x supersampling
+    // 8x oversampling
     var sample = 0.0;
     for (var si = 0; si < 8; ++si) {
       var sub_sample = 0.0;
