@@ -10,6 +10,40 @@ var NOISE = 3;
 var masterVolume = 1.0;
 
 
+var defaultKnobs = {
+  attack:  0,   // sec
+  sustain: 0.2, // sec
+  punch:   0,   // proportion
+  decay:   0.2, // sec
+
+  frequency:        1000, // Hz
+  frequencyMin:        0, // Hz
+  frequencySlide:      0, // 8va/sec
+  frequencySlideSlide: 0, // 8va/sec/sec
+
+  vibratoDepth:  0, // proportion
+  vibratoRate:  10, // Hz
+
+  arpeggioFactor: 0,   // multiple of frequency
+  argeggioDelay:  0.1, // sec  
+  
+  dutyCycle:      0.5, // proportion of wavelength
+  dutyCycleSweep: 0,   // proportion/second
+
+  retriggerRate: 0, // Hz
+
+  flangerOffset: 0, // sec
+  flangerSweep:  0, // offset/sec
+
+  lowPassFrequency: 44100, // Hz
+  lowPassSweep:     0,     // ^sec
+  lowPassResonance: 0.5,   // proportion
+
+  highPassFrequency: 0, // Hz
+  highPassSweep:     0, // ^sec
+};
+
+
 // Sound generation parameters are on [0,1] unless noted SIGNED & thus on [-1,1]
 function Params() {
   // Wave shape
@@ -310,7 +344,8 @@ Params.prototype.tone = function () {
 var generate = function (ps) {
 
   //
-  // Convert user-facing parameter values to units usable by the sound generator
+  // Convert user-facing parameter values to units usable by the sound
+  // generator
   //
 
   var rep_time;
@@ -379,12 +414,12 @@ var generate = function (ps) {
   if (ps.p_pha_ramp < 0.0) fdphase = -fdphase;
   var iphase = Math.abs(Math.floor(fphase));
   var ipp = 0;
-  var phaser_buffer = [];
+  var phaser_buffer = Array(1024);
   for (var i = 0; i < 1024; ++i)
     phaser_buffer[i] = 0.0;
 
   // Noise
-  var noise_buffer = [];
+  var noise_buffer = Array(32);
   for (var i = 0; i < 32; ++i)
     noise_buffer[i] = Math.random() * 2.0 - 1.0;
 
@@ -394,15 +429,13 @@ var generate = function (ps) {
   if (ps.p_repeat_speed === 0.0)
     rep_limit = 0;
 
-  //var gain = 2.0 * Math.log(1 + (Math.E - 1) * ps.sound_vol);
-  var gain = 2.0 * ps.sound_vol;
   var gain = Math.exp(ps.sound_vol) - 1;
-
-  var num_clipped = 0;
 
   //
   // End of parameter conversion. Generate samples.
   //
+
+  var num_clipped = 0;
 
   var buffer = [];
 

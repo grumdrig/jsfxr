@@ -127,7 +127,9 @@ $(function() {
     slider("value", 0);
   $('.slider').each(function () {
       var is = this.id;
-      $(this).parent().parent().find('th').append($('<label>', {for: is}));
+      if (!$('label[for="' + is + '"]').length) 
+        $(this).parent().parent().find('th').append($('<label>', 
+                                                      {for: is}));
     });
 
   var UNITS = {
@@ -176,6 +178,12 @@ $(function() {
       return (v === 0) ? 'OFF' : Math.round(8 * 44100 * v / (1-v)) + ' Hz'; },
     p_hpf_ramp: function (v) {  if (v === 1) return 'OFF';
       return Math.pow(v, 44100).toPrecision(4) + ' ^sec'; },
+
+    sound_vol: function (v) { 
+      v = 10 * Math.log(v*v) / Math.log(10);
+      var sign = v >= 0 ? '+' : '';
+      return sign + v.toPrecision(4) + ' dB'; 
+    }
   };
 
   var CONVERSIONS = {
@@ -211,7 +219,9 @@ $(function() {
     p_lpf_resonance: function (v) { return 5.0 / (1.0 + Math.pow(v, 2) * 20) }, // * (0.01 + fltw);
 
     p_hpf_freq: function (v) { return Math.pow(v, 2) * 0.1 },
-    p_hpf_ramp: function (v) { return 1.0 + v * 0.0003 }
+    p_hpf_ramp: function (v) { return 1.0 + v * 0.0003 },
+
+    sound_vol: function (v) { return Math.exp(v) - 1; }
   };
   for (var p in CONVERSIONS) {
     var control = $('#' + p)[0];
@@ -442,7 +452,7 @@ To save the sound, right- or control-click the following link, select
   </p>
 
 <form>
-  Gain<br/>
+  Gain <label for="sound_vol"></label><br/>
   <div class="slider" id="sound_vol"></div> <br/>
   <br/>
 
