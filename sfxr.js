@@ -51,11 +51,14 @@ var defaultKnobs = {
 };
 
 
-function Knobs() {
-  var result = {};
-  for (var i in defaultKnobs) 
-    result[i] = defaultKnobs[i];
-  return result;
+function Knobs(settings) {
+  settings = settings||{};
+  for (var i in defaultKnobs) {
+    if (settings.hasOwnProperty(i))
+      this[i] = settings[i];
+    else
+      this[i] = defaultKnobs[i];
+  }
 }
 
 // Sound generation parameters are on [0,1] unless noted SIGNED & thus
@@ -708,4 +711,8 @@ if (typeof exports !== 'undefined')  {
   exports.Knobs = Knobs;
   exports.SoundEffect = SoundEffect;
   exports.SoundEffectByUI = SoundEffectByUI;
+  exports.SQUARE = SQUARE;
+  exports.SAWTOOTH = SAWTOOTH;
+  exports.SINE = SINE;
+  exports.NOISE = NOISE;
 }
