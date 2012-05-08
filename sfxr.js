@@ -349,14 +349,14 @@ Params.prototype.tone = function () {
 
 
 // Generate audio waveform according to the parameters thereof
-function generate(ps) {
+function SoundEffect(ps) {
 
   //
   // Convert user-facing parameter values to units usable by the sound
   // generator
   //
 
-  function repeat() {
+  this.initForRepeat = function() {
     this.elapsedSinceRepeat = 0;
 
     this.period = 100 / (ps.p_base_freq * ps.p_base_freq + 0.001);
@@ -375,9 +375,9 @@ function generate(ps) {
     this.arpeggioTime = Math.floor(Math.pow(1.0 - ps.p_arp_speed, 2.0) * 20000 + 32);
     if (ps.p_arp_speed === 1.0)
       this.arpeggioTime = 0;
-  };
+  }
 
-  repeat();  // First time through, this is a bit of a misnomer
+  this.initForRepeat();  // First time through, this is a bit of a misnomer
 
   // Waveform shape
   this.waveShape = parseInt(ps.wave_type);
@@ -412,19 +412,18 @@ function generate(ps) {
 
   // Repeat
   this.repeatTime = Math.floor(Math.pow(1.0 - ps.p_repeat_speed, 2.0) * 20000
-                             + 32);
+                               + 32);
   if (ps.p_repeat_speed === 0.0)
     this.repeatTime = 0;
 
   this.gain = Math.exp(ps.sound_vol) - 1;
 
   this.sampleRate = ps.sample_rate;
-  this.sampleSize = ps.sample_size;
+  this.bitsPerChannel = ps.sample_size;
+}
 
-  //
-  // End of parameter conversion. Generate samples.
-  //
 
+SoundEffect.prototype.generate = function () {
   var fltp = 0.0;
   var fltdp = 0.0;
   var fltphp = 0.0;
@@ -456,7 +455,7 @@ function generate(ps) {
 
     // Repeats
     if (this.repeatTime != 0 && ++this.elapsedSinceRepeat >= this.repeatTime)
-      repeat();
+      this.initForRepeat();
 
     // Arpeggio (single)
     if(this.arpeggioTime != 0 && t >= this.arpeggioTime) {
@@ -589,7 +588,7 @@ function generate(ps) {
     sample = sample / 8 * masterVolume;
     sample *= this.gain;
 
-    if (this.sampleSize === 8) {
+    if (this.bitsPerChannel === 8) {
       // Rescale [-1.0, 1.0) to [0, 256)
       sample = Math.floor((sample + 1) * 128);
       if (sample > 255) {
@@ -617,7 +616,7 @@ function generate(ps) {
 
   var wave = new RIFFWAVE();
   wave.header.sampleRate = this.sampleRate;
-  wave.header.bitsPerSample = this.sampleSize;
+  wave.header.bitsPerSample = this.bitsPerChannel;
   wave.Make(buffer);
   wave.clipping = num_clipped;
   return wave;
@@ -628,5 +627,5 @@ function generate(ps) {
 if (typeof exports !== 'undefined')  {
   var RIFFWAVE = require("./riffwave").RIFFWAVE;
   exports.Params = Params;
-  exports.generate = generate;
+  exports.generate = function (ps) { return new SoundEffect(ps).generate(); }
 }
