@@ -83,9 +83,9 @@ function Params() {
   // Repeat
   this.p_repeat_speed = 0.0; // Repeat speed
 
-  // Phaser
-  this.p_pha_offset = 0.0;   // Phaser offset (SIGNED)
-  this.p_pha_ramp = 0.0;     // Phaser sweep (SIGNED)
+  // Flanger
+  this.p_pha_offset = 0.0;   // Flanger offset (SIGNED)
+  this.p_pha_ramp = 0.0;     // Flanger sweep (SIGNED)
 
   // Low-pass filter
   this.p_lpf_freq = 1.0;     // Low-pass filter cutoff
@@ -339,9 +339,9 @@ Params.prototype.random = function () {
 
 Params.prototype.tone = function () {
   this.wave_tuype = SINE;
-  this.p_base_freq = .35173364;  // 440 Hz
-  this.p_env_attack = 0.0;
-  this.p_env_sustain = 0.6641;  // 1 sec
+  this.p_base_freq = 0.35173364; // 440 Hz
+  this.p_env_attack = 0;
+  this.p_env_sustain = 0.6641; // 1 sec
   this.p_env_decay = 0;
   this.p_env_punch = 0;
   return this;
@@ -356,92 +356,94 @@ function generate(ps) {
   // generator
   //
 
-  var rep_time;
-  var fperiod, period, fmaxperiod;
-  var fslide, fdslide;
-  var square_duty, square_slide;
-  var arp_mod, arp_time, arp_limit;
-
   function repeat() {
-    rep_time = 0;
+    this.elapsedSinceRepeat = 0;
 
-    fperiod = 100.0 / (ps.p_base_freq * ps.p_base_freq + 0.001);
-    period = Math.floor(fperiod);
-    fmaxperiod = 100.0 / (ps.p_freq_limit * ps.p_freq_limit + 0.001);
+    this.period = 100 / (ps.p_base_freq * ps.p_base_freq + 0.001);
+    this.periodMax = 100 / (ps.p_freq_limit * ps.p_freq_limit + 0.001);
+    this.enableFrequencyCutoff = (ps.p_freq_limit > 0.0);
+    this.periodMult = 1 - Math.pow(ps.p_freq_ramp, 3) * 0.01;
+    this.periodMultSlide = -Math.pow(ps.p_freq_dramp, 3) * 0.000001;
 
-    fslide = 1.0 - Math.pow(ps.p_freq_ramp, 3.0) * 0.01;
-    fdslide = -Math.pow(ps.p_freq_dramp, 3.0) * 0.000001;
-
-    square_duty = 0.5 - ps.p_duty * 0.5;
-    square_slide = -ps.p_duty_ramp * 0.00005;
+    this.dutyCycle = 0.5 - ps.p_duty * 0.5;
+    this.dutyCycleSlide = -ps.p_duty_ramp * 0.00005;
 
     if (ps.p_arp_mod >= 0.0)
-      arp_mod = 1.0 - Math.pow(ps.p_arp_mod, 2.0) * 0.9;
+      this.arpeggioMultiplier = 1 - Math.pow(ps.p_arp_mod, 2.0) * .9;
     else
-      arp_mod = 1.0 + Math.pow(ps.p_arp_mod, 2.0) * 10.0;
-    arp_time = 0;
-    arp_limit = Math.floor(Math.pow(1.0 - ps.p_arp_speed, 2.0) * 20000 + 32);
+      this.arpeggioMultiplier = 1 + Math.pow(ps.p_arp_mod, 2.0) * 10;
+    this.arpeggioTime = Math.floor(Math.pow(1.0 - ps.p_arp_speed, 2.0) * 20000 + 32);
     if (ps.p_arp_speed === 1.0)
-      arp_limit = 0;
+      this.arpeggioTime = 0;
   };
 
   repeat();  // First time through, this is a bit of a misnomer
 
+  // Waveform shape
+  this.waveShape = parseInt(ps.wave_type);
+
   // Filter
-  var fltp = 0.0;
-  var fltdp = 0.0;
-  var fltw = Math.pow(ps.p_lpf_freq, 3.0) * 0.1;
-  var fltw_d = 1.0 + ps.p_lpf_ramp * 0.0001;
-  var fltdmp = 5.0 / (1.0 + Math.pow(ps.p_lpf_resonance, 2.0) * 20.0) *
-    (0.01 + fltw);
-  if (fltdmp > 0.8) fltdmp=0.8;
-  var fltphp = 0.0;
-  var flthp = Math.pow(ps.p_hpf_freq, 2.0) * 0.1;
-  var flthp_d = 1.0 + ps.p_hpf_ramp * 0.0003;
+  this.fltw = Math.pow(ps.p_lpf_freq, 3.0) * 0.1;
+  this.enableLowPassFilter = (ps.p_lpf_freq != 1);
+  this.fltw_d = 1.0 + ps.p_lpf_ramp * 0.0001;
+  this.fltdmp = 5.0 / (1.0 + Math.pow(ps.p_lpf_resonance, 2.0) * 20.0) *
+    (0.01 + this.fltw);
+  if (this.fltdmp > 0.8) this.fltdmp=0.8;
+  this.flthp = Math.pow(ps.p_hpf_freq, 2.0) * 0.1;
+  this.flthp_d = 1.0 + ps.p_hpf_ramp * 0.0003;
 
   // Vibrato
-  var vib_phase = 0.0;
-  var vib_speed = Math.pow(ps.p_vib_speed, 2.0) * 0.01;
-  var vib_amp = ps.p_vib_strength * 0.5;
+  this.vibratoSpeed = Math.pow(ps.p_vib_speed, 2.0) * 0.01;
+  this.vibratoAmplitude = ps.p_vib_strength * 0.5;
 
   // Envelope
-  var env_vol = 0.0;
-  var env_stage = 0;
-  var env_time = 0;
-  var env_length = [
+  this.envelopeLength = [
     Math.floor(ps.p_env_attack * ps.p_env_attack * 100000.0),
     Math.floor(ps.p_env_sustain * ps.p_env_sustain * 100000.0),
     Math.floor(ps.p_env_decay * ps.p_env_decay * 100000.0)
   ];
+  this.envelopePunch = ps.p_env_punch;
 
-  // Phaser
-  var phase = 0;
-  var fphase = Math.pow(ps.p_pha_offset, 2.0) * 1020.0;
-  if (ps.p_pha_offset < 0.0) fphase = -fphase;
-  var fdphase = Math.pow(ps.p_pha_ramp, 2.0) * 1.0;
-  if (ps.p_pha_ramp < 0.0) fdphase = -fdphase;
-  var iphase = Math.abs(Math.floor(fphase));
-  var ipp = 0;
-  var phaser_buffer = Array(1024);
-  for (var i = 0; i < 1024; ++i)
-    phaser_buffer[i] = 0.0;
-
-  // Noise
-  var noise_buffer = Array(32);
-  for (var i = 0; i < 32; ++i)
-    noise_buffer[i] = Math.random() * 2.0 - 1.0;
+  // Flanger
+  this.flangerOffset = Math.pow(ps.p_pha_offset, 2.0) * 1020.0;
+  if (ps.p_pha_offset < 0.0) this.flangerOffset = -this.flangerOffset;
+  this.flangerOffsetSlide = Math.pow(ps.p_pha_ramp, 2.0) * 1.0;
+  if (ps.p_pha_ramp < 0.0) this.flangerOffsetSlide = -this.flangerOffsetSlide;
 
   // Repeat
-  var rep_limit = Math.floor(Math.pow(1.0 - ps.p_repeat_speed, 2.0) * 20000
+  this.repeatTime = Math.floor(Math.pow(1.0 - ps.p_repeat_speed, 2.0) * 20000
                              + 32);
   if (ps.p_repeat_speed === 0.0)
-    rep_limit = 0;
+    this.repeatTime = 0;
 
-  var gain = Math.exp(ps.sound_vol) - 1;
+  this.gain = Math.exp(ps.sound_vol) - 1;
+
+  this.sampleRate = ps.sample_rate;
+  this.sampleSize = ps.sample_size;
+  console.log(this.sampleSize);
 
   //
   // End of parameter conversion. Generate samples.
   //
+
+  var fltp = 0.0;
+  var fltdp = 0.0;
+  var fltphp = 0.0;
+
+  var noise_buffer = Array(32);
+  for (var i = 0; i < 32; ++i)
+    noise_buffer[i] = Math.random() * 2.0 - 1.0;
+
+  var envelopeStage = 0;
+  var envelopeElapsed = 0;
+
+  var vibratoPhase = 0.0;
+
+  var phase = 0;
+  var ipp = 0;
+  var flanger_buffer = Array(1024);
+  for (var i = 0; i < 1024; ++i)
+    flanger_buffer[i] = 0.0;
 
   var num_clipped = 0;
 
@@ -449,109 +451,112 @@ function generate(ps) {
 
   var sample_sum = 0;
   var num_summed = 0;
-  var summands = Math.floor(44100 / ps.sample_rate);
+  var summands = Math.floor(44100 / this.sampleRate);
 
   for(var t = 0; ; ++t) {
 
     // Repeats
-    if (rep_limit != 0 && ++rep_time >= rep_limit)
+    if (this.repeatTime != 0 && ++this.elapsedSinceRepeat >= this.repeatTime)
       repeat();
 
     // Arpeggio (single)
-    if(arp_limit != 0 && t >= arp_limit) {
-      arp_limit = 0;
-      fperiod *= arp_mod;
+    if(this.arpeggioTime != 0 && t >= this.arpeggioTime) {
+      this.arpeggioTime = 0;
+      this.period *= this.arpeggioMultiplier;
     }
 
     // Frequency slide, and frequency slide slide!
-    fslide += fdslide;
-    fperiod *= fslide;
-    if(fperiod > fmaxperiod) {
-      fperiod = fmaxperiod;
-      if (ps.p_freq_limit > 0.0)
+    this.periodMult += this.periodMultSlide;
+    this.period *= this.periodMult;
+    if(this.period > this.periodMax) {
+      this.period = this.periodMax;
+      if (this.enableFrequencyCutoff)
         break;
     }
 
     // Vibrato
-    var rfperiod = fperiod;
-    if (vib_amp > 0.0) {
-      vib_phase += vib_speed;
-      rfperiod = fperiod * (1.0 + Math.sin(vib_phase) * vib_amp);
+    var rfperiod = this.period;
+    if (this.vibratoAmplitude > 0.0) {
+      vibratoPhase += this.vibratoSpeed;
+      rfperiod = this.period * (1.0 + Math.sin(vibratoPhase) * this.vibratoAmplitude);
     }
-    period = Math.floor(rfperiod);
-    if (period < 8) period = 8;
+    var iperiod = Math.floor(rfperiod);
+    if (iperiod < 8) iperiod = 8;
 
-    square_duty += square_slide;
-    if (square_duty < 0.0) square_duty = 0.0;
-    if (square_duty > 0.5) square_duty = 0.5;
+    // Square wave duty cycle
+    this.dutyCycle += this.dutyCycleSlide;
+    if (this.dutyCycle < 0.0) this.dutyCycle = 0.0;
+    if (this.dutyCycle > 0.5) this.dutyCycle = 0.5;
 
     // Volume envelope
-    env_time++;
-    if (env_time > env_length[env_stage]) {
-      env_time = 0;
-      env_stage++;
-      if (env_stage === 3)
+    if (++envelopeElapsed > this.envelopeLength[envelopeStage]) {
+      envelopeElapsed = 0;
+      if (++envelopeStage > 2)
         break;
     }
-    if (env_stage === 0)
-      env_vol = env_time / env_length[0];
-    else if (env_stage === 1)
-      env_vol = 1.0 + Math.pow(1.0 - env_time / env_length[1],
-                               1.0) * 2.0 * ps.p_env_punch;
-    else  // env_stage === 2
-      env_vol = 1.0 - env_time / env_length[2];
+    var env_vol;
+    if (envelopeStage === 0) {
+      // Attack
+      env_vol = envelopeElapsed / this.envelopeLength[0];
+    } else if (envelopeStage === 1) {
+      // Sustain
+      env_vol = 1.0 + Math.pow(1.0 - envelopeElapsed / this.envelopeLength[1],
+                               1.0) * 2.0 * this.envelopePunch;
+    } else {
+      // Decay
+      env_vol = 1.0 - envelopeElapsed / this.envelopeLength[2];
+    }
 
-    // Phaser step
-    fphase += fdphase;
-    iphase = Math.abs(Math.floor(fphase));
+    // Flanger step
+    this.flangerOffset += this.flangerOffsetSlide;
+    var iphase = Math.abs(Math.floor(this.flangerOffset));
     if (iphase > 1023) iphase = 1023;
 
-    if (flthp_d != 0.0) {
-      flthp *= flthp_d;
-      if (flthp < 0.00001)
-        flthp = 0.00001;
-      if (flthp > 0.1)
-        flthp = 0.1;
+    if (this.flthp_d != 0.0) {
+      this.flthp *= this.flthp_d;
+      if (this.flthp < 0.00001)
+        this.flthp = 0.00001;
+      if (this.flthp > 0.1)
+        this.flthp = 0.1;
     }
 
     // 8x oversampling
-    var sample = 0.0;
+    var sample = 0;
     for (var si = 0; si < 8; ++si) {
-      var sub_sample = 0.0;
+      var sub_sample = 0;
       phase++;
-      if (phase >= period) {
-        phase %= period;
-        if (ps.wave_type === NOISE)
+      if (phase >= iperiod) {
+        phase %= iperiod;
+        if (this.waveShape === NOISE)
           for(var i = 0; i < 32; ++i)
             noise_buffer[i] = Math.random() * 2.0 - 1.0;
       }
 
       // Base waveform
-      var fp = phase / period;
-      ps.wave_type = parseInt(ps.wave_type);
-      if (ps.wave_type === SQUARE) {
-        if (fp < square_duty)
+      var fp = phase / iperiod;
+      if (this.waveShape === SQUARE) {
+        if (fp < this.dutyCycle)
           sub_sample=0.5;
         else
           sub_sample=-0.5;
-      } else if (ps.wave_type === SAWTOOTH) {
+      } else if (this.waveShape === SAWTOOTH) {
         sub_sample = 1.0 - fp * 2;
-      } else if (ps.wave_type === SINE) {
+      } else if (this.waveShape === SINE) {
         sub_sample = Math.sin(fp * 2 * Math.PI);
-      } else if (ps.wave_type === NOISE) {
-        sub_sample = noise_buffer[Math.floor(phase * 32 / period)];
+      } else if (this.waveShape === NOISE) {
+        sub_sample = noise_buffer[Math.floor(phase * 32 / iperiod)];
       } else {
-        throw "ERROR: Bad wave type: " + ps.wave_type;
+        throw "ERROR: Bad wave type: " + this.waveShape;
       }
 
       // Low-pass filter
       var pp = fltp;
-      fltw *= fltw_d;
-      if (fltw < 0.0) fltw = 0.0;
-      if (fltw > 0.1) fltw = 0.1;
-      if (ps.p_lpf_freq != 1.0) {
-        fltdp += (sub_sample - fltp) * fltw;
-        fltdp -= fltdp * fltdmp;
+      this.fltw *= this.fltw_d;
+      if (this.fltw < 0.0) this.fltw = 0.0;
+      if (this.fltw > 0.1) this.fltw = 0.1;
+      if (this.enableLowPassFilter) {
+        fltdp += (sub_sample - fltp) * this.fltw;
+        fltdp -= fltdp * this.fltdmp;
       } else {
         fltp = sub_sample;
         fltdp = 0.0;
@@ -560,12 +565,12 @@ function generate(ps) {
 
       // High-pass filter
       fltphp += fltp - pp;
-      fltphp -= fltphp * flthp;
+      fltphp -= fltphp * this.flthp;
       sub_sample = fltphp;
 
-      // Phaser
-      phaser_buffer[ipp & 1023] = sub_sample;
-      sub_sample += phaser_buffer[(ipp - iphase + 1024) & 1023];
+      // Flanger
+      flanger_buffer[ipp & 1023] = sub_sample;
+      sub_sample += flanger_buffer[(ipp - iphase + 1024) & 1023];
       ipp = (ipp + 1) & 1023;
 
       // final accumulation and envelope application
@@ -583,9 +588,9 @@ function generate(ps) {
     }
 
     sample = sample / 8 * masterVolume;
-    sample *= gain;
+    sample *= this.gain;
 
-    if (ps.sample_size === 8) {
+    if (this.sampleSize === 8) {
       // Rescale [-1.0, 1.0) to [0, 256)
       sample = Math.floor((sample + 1) * 128);
       if (sample > 255) {
@@ -612,8 +617,8 @@ function generate(ps) {
   }
 
   var wave = new RIFFWAVE();
-  wave.header.sampleRate = ps.sample_rate;
-  wave.header.bitsPerSample = ps.sample_size;
+  wave.header.sampleRate = this.sampleRate;
+  wave.header.bitsPerSample = this.sampleSize;
   wave.Make(buffer);
   wave.clipping = num_clipped;
   return wave;
