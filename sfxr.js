@@ -61,9 +61,67 @@ function Knobs(settings) {
   }
 }
 
+Knobs.prototype.translate = function (ps) {
+  function sqr(x) { return x * x }
+  function cube(x) { return x * x * x }
+  function sign(x) { return x < 0 ? -1 : 1 }
+  function log(x, b) { return Math.log(x) / Math.log(b); }
+  var pow = Math.pow;
+
+
+  this.attack = sqr(ps.p_env_attack) * 100000 / 44100;
+  this.sustain = sqr(ps.p_env_sustain) * 100000 / 44100;
+  this.punch = ps.p_env_punch;
+  this.decay = sqr(ps.p_env_decay) * 100000 / 44100;
+
+  this.frequency = 8 * 441 * (sqr(ps.p_base_freq) + 0.001);
+  this.frequencyMin = 8 * 441 * (sqr(ps.p_freq_limit) + 0.001);
+  this.frequencySlide = 44100 * log(1 - cube(ps.p_freq_ramp) / 100, 0.5);
+  this.frequencySlideSlide = -cube(ps.p_freq_dramp) / 1000000 * 
+    44100 * pow(2, 44101/44100);
+
+  this.vibratoRate = 44100 * 10 / 64 * sqr(ps.p_vib_speed) / 100;
+  this.vibratoDepth = ps.p_vib_strength / 2;
+
+  this.arpeggioFactor = 1 / ((ps.p_arp_mod >= 0) ? 
+                             1.0 - sqr(ps.p_arp_mod) * 0.9 : 
+                             1.0 + sqr(ps.p_arp_mod) * 10);
+  this.arpeggioDelay = ((ps.p_arp_speed === 1) ? 0 :
+                Math.floor(sqr(1 - ps.p_arp_speed) * 20000 + 32) / 44100);
+
+  this.dutyCycle = (1 - ps.p_duty) / 2;
+  this.dutyCycleSweep = 8 * 44100 * -ps.p_duty_ramp / 20000;
+
+  this.retriggerRate = 44100 / ((ps.p_repeat_speed === 0) ? 0 :
+                       Math.floor(sqr(1 - ps.p_repeat_speed) * 20000) + 32);
+
+  this.flangerOffset = sign(ps.p_pha_offset) * 
+    sqr(ps.p_pha_offset) * 1020 / 44100;
+  this.flangerSweep = sign(ps.p_pha_ramp) * sqr(ps.p_pha_ramp);
+
+  function flurp(x) { return x / (1-x) }
+  this.lowPassFrequency = Math.round(8 * 44100 * 
+                                     flurp(cube(ps.p_lpf_freq) / 10));
+  this.lowPassSweep = pow(1 + ps.p_lpf_ramp / 10000, 44100);
+  this.lowPassResonance = 1 - (5 / (1 + sqr(ps.p_lpf_resonance) * 20)) / 9;
+
+  this.highPassFrequency = Math.round(8 * 44100 * 
+                                      flurp(sqr(ps.p_hpf_freq) / 10));
+  this.highPassSweep = pow(1 + ps.p_hpf_ramp * 0.0003, 44100);
+
+  this.gain = 10 * log(sqr(Math.exp(ps.sound_vol) - 1), 10);
+
+  this.sampleRate = ps.sample_rate;
+  this.sampleSize = ps.sample_size;
+
+  return this;
+}
+
 // Sound generation parameters are on [0,1] unless noted SIGNED & thus
 // on [-1,1]
 function Params() {
+  this.oldParams = true;  // Note what structure this is
+
   // Wave shape
   this.wave_type = SQUARE;
 
@@ -137,6 +195,15 @@ Params.prototype.pickupCoin = function () {
     this.p_arp_mod = 0.2 + frnd(0.4);
   }
   return this;
+}
+
+var genners = 'pickupCoin,laserShoot,explosion,powerUp,hitHurt,jump,blipSelect,random,tone'.split(',');
+for (var i = 0; i < genners.length; ++i) {
+  (function (g) {
+    Knobs.prototype[g] = function () {
+      return this.translate(new Params()[g]());
+    }
+  })(genners[i]);
 }
 
 
@@ -477,7 +544,7 @@ function SoundEffect(ps) {
   this.flthp_d = 1 + Math.pow(ps.highPassSweep, 1/44100);
 
   // Vibrato
-  this.vibratoSpeed = ps.vibratoRate * 64 / 441000;
+  this.vibratoSpeed = ps.vibratoRate * 64 / 44100 / 10;
   this.vibratoAmplitude = ps.vibratoDepth;
 
   // Envelope

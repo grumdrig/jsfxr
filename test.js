@@ -6,7 +6,7 @@ var RIFFWAVE = require("./riffwave.js").RIFFWAVE;
 var sfxr = require("./sfxr.js");
 
 //var sound = new sfxr.SoundEffectByUI((new sfxr.Params()).tone()).generate();
-
+/*
 var knobs = new sfxr.Knobs({
   shape: sfxr.SAWTOOTH,
   attack: 0.1,
@@ -15,6 +15,8 @@ var knobs = new sfxr.Knobs({
   frequency: 440,
 });
 var sound = new sfxr.SoundEffect(knobs).generate();
+*/
+var sound = new sfxr.SoundEffect(new sfxr.Knobs().tone()).generate();
 
 require("fs").writeFile("./test.wav", new Buffer(sound.wav), 'binary', 
                         function(err) {
