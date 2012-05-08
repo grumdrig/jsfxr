@@ -50,7 +50,7 @@ function play(noregen) {
   setTimeout(function () { 
     var audio = new Audio();
     if (!noregen) {
-      SOUND = new SoundEffect(PARAMS).generate();
+      SOUND = new SoundEffectByUI(PARAMS).generate();
       $("#file_size").text(Math.round(SOUND.wav.length / 1024) + "kB");
       $("#num_samples").text(SOUND.header.subChunk2Size / 
                              (SOUND.header.bitsPerSample >> 3));

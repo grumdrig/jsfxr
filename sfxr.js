@@ -26,7 +26,7 @@ var defaultKnobs = {
   vibratoDepth:  0, // proportion
   vibratoRate:  10, // Hz
 
-  arpeggioFactor: 0,   // multiple of frequency
+  arpeggioFactor: 1,   // multiple of frequency
   argeggioDelay:  0.1, // sec  
   
   dutyCycle:      0.5, // proportion of wavelength
@@ -348,8 +348,8 @@ Params.prototype.tone = function () {
 }
 
 
-// Generate audio waveform according to the parameters thereof
-function SoundEffect(ps) {
+
+function SoundEffectByUI(ps) {
 
   //
   // Convert user-facing parameter values to units usable by the sound
@@ -423,7 +423,74 @@ function SoundEffect(ps) {
 }
 
 
-SoundEffect.prototype.generate = function () {
+
+function SoundEffect(ps) {
+
+  //
+  // Convert user-facing parameter values to units usable by the sound
+  // generator
+  //
+
+  this.initForRepeat = function() {
+    this.elapsedSinceRepeat = 0;
+
+    this.period = 1 / (8 * 44100 * ps.frequency);
+    this.periodMax = 1 / (8 * 44100 * ps.frequencyMin);
+    this.enableFrequencyCutoff = (ps.frequencyMin > 0);
+    this.periodMult = Math.pow(.5, ps.frequencySlide / 44100);
+    this.periodMultSlide = Math.pow(2, -44101/44100) / 44100;
+
+    this.dutyCycle = ps.dutyCycle;
+    this.dutyCycleSlide = ps.dutyCycleSweep / (8 * 44100);
+
+    this.arpeggioMultiplier = 1 / ps.arpeggioFactor;
+    this.arpeggioTime = ps.ArpeggioDelay / 44100;
+  }
+  this.initForRepeat();  // First time through, this is a bit of a misnomer
+
+  // Waveform shape
+  this.waveShape = ps.shape;
+
+  // Low pass filter
+  this.fltw = ps.lowPassFrequency / (8 * 44100 + ps.lowPassFrequency);
+  this.enableLowPassFilter = ps.lowPassFrequency < 44100;
+  this.fltw_d = Math.pow(ps.lowPassSweep, 1/44100);
+  this.fltdmp = 9 * (1 - ps.lowPassResonance);
+
+  // High pass filter
+  this.flthp = ps.highPassFrequency / (8 * 44100 + ps.highPassFrequency);
+  this.flthp_d = Math.pow(ps.highPassSweep, 1/44100);
+
+  // Vibrato
+  this.vibratoAmplitude = ps.vibratoDepth;
+  this.vibratoSpeed = ps.vibratoRate * 64 / 441000;
+
+  // Envelope
+  this.envelopeLength = [
+    Math.floor(ps.attack * 44100),
+    Math.floor(ps.sustain * 44100),
+    Math.floor(ps.decay * 44100)
+  ];
+  this.envelopePunch = ps.punch;
+
+  // Flanger
+  this.flangerOffset = ps.flangerOffset * 44100;
+  this.flangerOffsetSlide = ps.flangerSweep;
+
+  // Repeat
+  this.repeatTime = 1 / (44100 * ps.retriggerRate);
+
+  // Gain
+  this.gain = Math.sqrt(Math.pow(10, ps.gain/10));
+
+  this.sampleRate = ps.sampleRate;
+  this.bitsPerChannel = ps.sampleSize;
+}
+
+
+
+SoundEffectByUI.prototype.generate =
+    SoundEffect.prototype.generate = function () {
   var fltp = 0.0;
   var fltdp = 0.0;
   var fltphp = 0.0;
@@ -627,5 +694,6 @@ SoundEffect.prototype.generate = function () {
 if (typeof exports !== 'undefined')  {
   var RIFFWAVE = require("./riffwave").RIFFWAVE;
   exports.Params = Params;
-  exports.generate = function (ps) { return new SoundEffect(ps).generate(); }
+  exports.SoundEffect = SoundEffect;
+  exports.SoundEffectByUI = SoundEffectByUI;
 }
