@@ -212,10 +212,12 @@ Params.prototype.explosion = function () {
 
 
 Params.prototype.powerUp = function () {
-  if (rnd(1))
+  if (rnd(1)) {
     this.wave_type = SAWTOOTH;
-  else
+    this.p_duty = 1;
+  } else {
     this.p_duty = frnd(0.6);
+  }
   if (rnd(1)) {
     this.p_base_freq = 0.2 + frnd(0.3);
     this.p_freq_ramp = 0.1 + frnd(0.4);
@@ -619,7 +621,10 @@ SoundEffectByUI.prototype.generate =
         else
           sub_sample=-0.5;
       } else if (this.waveShape === SAWTOOTH) {
-        sub_sample = 1.0 - fp * 2;
+        if (fp < this.dutyCycle)
+          sub_sample = -1 + 2 * fp/this.dutyCycle;
+        else
+          sub_sample = 1 - 2 * (fp-this.dutyCycle)/(1-this.dutyCycle);
       } else if (this.waveShape === SINE) {
         sub_sample = Math.sin(fp * 2 * Math.PI);
       } else if (this.waveShape === NOISE) {

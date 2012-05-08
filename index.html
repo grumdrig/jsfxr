@@ -64,8 +64,9 @@ function play(noregen) {
 }
 
 function disenable() {
-  $("#p_duty").slider("option", "disabled", PARAMS.wave_type != SQUARE);
-  $("#p_duty_ramp").slider("option", "disabled", PARAMS.wave_type != SQUARE);
+  var duty = PARAMS.wave_type == SQUARE || PARAMS.wave_type == SAWTOOTH;
+  $("#p_duty").slider("option", "disabled", !duty);
+  $("#p_duty_ramp").slider("option", "disabled", !duty);
 }
 
 function updateUi() {
@@ -404,7 +405,7 @@ a {
   <tr><td><div class="slider" id="p_env_decay"></div> <th>Decay time
   <tr><th colspan=2>Frequency
   <tr><td><div class="slider" id="p_base_freq"></div> <th>Start frequency
-  <tr><td><div class="slider" id="p_freq_limit"></div> <th>Min frequency cutoff
+  <tr><td><div class="slider" id="p_freq_limit"></div> <th>Min freq. cutoff
   <tr><td><div class="signed slider" id="p_freq_ramp"></div> <th>Slide
   <tr><td><div class="signed slider" id="p_freq_dramp"></div> <th>Delta slide
   <tr><th colspan=2>Vibrato
@@ -413,7 +414,7 @@ a {
   <tr><th colspan=2>Arpeggiation
   <tr><td><div class="signed slider" id="p_arp_mod"></div> <th>Frequency mult
   <tr><td><div class="slider" id="p_arp_speed"></div> <th>Change speed
-  <tr><th colspan=2>Square Wave Duty Cycle                           
+  <tr><th colspan=2>Duty Cycle                           
   <tr><td><div class="slider" id="p_duty"></div> <th>Duty cycle
   <tr><td><div class="signed slider" id="p_duty_ramp"></div> <th>Sweep
   <tr><th colspan=2>Retrigger
