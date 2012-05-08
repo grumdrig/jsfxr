@@ -420,7 +420,6 @@ function generate(ps) {
 
   this.sampleRate = ps.sample_rate;
   this.sampleSize = ps.sample_size;
-  console.log(this.sampleSize);
 
   //
   // End of parameter conversion. Generate samples.

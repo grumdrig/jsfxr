@@ -94,16 +94,16 @@ $(function() {
   $("#hz").buttonset();
   $("#bits").buttonset();
   $("#shape input:radio").change(function (event) {
-    PARAMS.wave_type = event.target.value;
+    PARAMS.wave_type = parseInt(event.target.value);
     disenable();
     play();
   });
   $("#hz input:radio").change(function (event) {
-    SAMPLE_RATE = PARAMS.sample_rate = event.target.value;
+    SAMPLE_RATE = PARAMS.sample_rate = parseInt(event.target.value);
     play();
   });
   $("#bits input:radio").change(function (event) {
-    SAMPLE_SIZE = PARAMS.sample_size = event.target.value;
+    SAMPLE_SIZE = PARAMS.sample_size = parseInt(event.target.value);
     play();
   });
   $("button").button();
