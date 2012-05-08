@@ -11,6 +11,8 @@ var masterVolume = 1.0;
 
 
 var defaultKnobs = {
+  shape: SQUARE, // SQUARE/SAWTOOTH/SINE/NOISE
+
   attack:  0,   // sec
   sustain: 0.2, // sec
   punch:   0,   // proportion
@@ -41,10 +43,16 @@ var defaultKnobs = {
 
   highPassFrequency: 0, // Hz
   highPassSweep:     0, // ^sec
+  
+  gain: 0, // dB
+
+  sampleRate: 44100, // Hz
+  sampleSize: 8,     // bits per channel
 };
 
 
-// Sound generation parameters are on [0,1] unless noted SIGNED & thus on [-1,1]
+// Sound generation parameters are on [0,1] unless noted SIGNED & thus
+// on [-1,1]
 function Params() {
   // Wave shape
   this.wave_type = SQUARE;
@@ -341,7 +349,7 @@ Params.prototype.tone = function () {
 
 
 // Generate audio waveform according to the parameters thereof
-var generate = function (ps) {
+function generate(ps) {
 
   //
   // Convert user-facing parameter values to units usable by the sound
