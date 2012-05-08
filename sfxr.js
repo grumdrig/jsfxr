@@ -27,7 +27,7 @@ var defaultKnobs = {
   vibratoRate:  10, // Hz
 
   arpeggioFactor: 1,   // multiple of frequency
-  argeggioDelay:  0.1, // sec  
+  arpeggioDelay:  0.1, // sec  
   
   dutyCycle:      0.5, // proportion of wavelength
   dutyCycleSweep: 0,   // proportion/second
@@ -38,18 +38,25 @@ var defaultKnobs = {
   flangerSweep:  0, // offset/sec
 
   lowPassFrequency: 44100, // Hz
-  lowPassSweep:     0,     // ^sec
+  lowPassSweep:     1,     // ^sec
   lowPassResonance: 0.5,   // proportion
 
   highPassFrequency: 0, // Hz
   highPassSweep:     0, // ^sec
   
-  gain: 0, // dB
+  gain: -10, // dB
 
   sampleRate: 44100, // Hz
   sampleSize: 8,     // bits per channel
 };
 
+
+function Knobs() {
+  var result = {};
+  for (var i in defaultKnobs) 
+    result[i] = defaultKnobs[i];
+  return result;
+}
 
 // Sound generation parameters are on [0,1] unless noted SIGNED & thus
 // on [-1,1]
@@ -420,6 +427,8 @@ function SoundEffectByUI(ps) {
 
   this.sampleRate = ps.sample_rate;
   this.bitsPerChannel = ps.sample_size;
+
+  // for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
 }
 
 
@@ -434,17 +443,18 @@ function SoundEffect(ps) {
   this.initForRepeat = function() {
     this.elapsedSinceRepeat = 0;
 
-    this.period = 1 / (8 * 44100 * ps.frequency);
-    this.periodMax = 1 / (8 * 44100 * ps.frequencyMin);
+    this.period = 8 * 44100 / ps.frequency;
+    this.periodMax = 8 * 44100 / ps.frequencyMin;
     this.enableFrequencyCutoff = (ps.frequencyMin > 0);
     this.periodMult = Math.pow(.5, ps.frequencySlide / 44100);
-    this.periodMultSlide = Math.pow(2, -44101/44100) / 44100;
+    this.periodMultSlide = ps.frequencySlideSlide * Math.pow(2, -44101/44100)
+      / 44100;
 
     this.dutyCycle = ps.dutyCycle;
     this.dutyCycleSlide = ps.dutyCycleSweep / (8 * 44100);
 
     this.arpeggioMultiplier = 1 / ps.arpeggioFactor;
-    this.arpeggioTime = ps.ArpeggioDelay / 44100;
+    this.arpeggioTime = ps.arpeggioDelay * 44100;
   }
   this.initForRepeat();  // First time through, this is a bit of a misnomer
 
@@ -455,15 +465,15 @@ function SoundEffect(ps) {
   this.fltw = ps.lowPassFrequency / (8 * 44100 + ps.lowPassFrequency);
   this.enableLowPassFilter = ps.lowPassFrequency < 44100;
   this.fltw_d = Math.pow(ps.lowPassSweep, 1/44100);
-  this.fltdmp = 9 * (1 - ps.lowPassResonance);
+  this.fltdmp = ps.lowPassResonance * (.01 + this.fltw);
 
   // High pass filter
   this.flthp = ps.highPassFrequency / (8 * 44100 + ps.highPassFrequency);
-  this.flthp_d = Math.pow(ps.highPassSweep, 1/44100);
+  this.flthp_d = 1 + Math.pow(ps.highPassSweep, 1/44100);
 
   // Vibrato
-  this.vibratoAmplitude = ps.vibratoDepth;
   this.vibratoSpeed = ps.vibratoRate * 64 / 441000;
+  this.vibratoAmplitude = ps.vibratoDepth;
 
   // Envelope
   this.envelopeLength = [
@@ -478,15 +488,16 @@ function SoundEffect(ps) {
   this.flangerOffsetSlide = ps.flangerSweep;
 
   // Repeat
-  this.repeatTime = 1 / (44100 * ps.retriggerRate);
+  this.repeatTime = ps.retriggerRate ? 1 / (44100 * ps.retriggerRate) : 0;
 
   // Gain
   this.gain = Math.sqrt(Math.pow(10, ps.gain/10));
 
   this.sampleRate = ps.sampleRate;
   this.bitsPerChannel = ps.sampleSize;
-}
 
+  //for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
+}
 
 
 SoundEffectByUI.prototype.generate =
@@ -694,6 +705,7 @@ SoundEffectByUI.prototype.generate =
 if (typeof exports !== 'undefined')  {
   var RIFFWAVE = require("./riffwave").RIFFWAVE;
   exports.Params = Params;
+  exports.Knobs = Knobs;
   exports.SoundEffect = SoundEffect;
   exports.SoundEffectByUI = SoundEffectByUI;
 }
