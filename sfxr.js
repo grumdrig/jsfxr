@@ -237,7 +237,9 @@ Params.prototype.laserShoot = function () {
     if (this.p_freq_limit < 0.2) this.p_freq_limit = 0.2;
     this.p_freq_ramp = -0.15 - frnd(0.2);
   }
-  if (0 && rnd(1)) {
+  if (this.wave_type === SAWTOOTH)
+    this.p_duty = 1;
+  if (rnd(1)) {
     this.p_duty = frnd(0.5);
     this.p_duty_ramp = frnd(0.2);
   } else {
@@ -273,6 +275,8 @@ Knobs.prototype.laserShoot = function () {
     this.frequencyMin = rndr(144, 2/3 * this.frequency);
     this.frequencySlide = rndr(-2.15, -27.27);
   }
+  if (this.shape === SAWTOOTH)
+    this.dutyCycle = 0;
   if (rnd(1)) {
     this.dutyCycle = rndr(1/4, 1/2);
     this.dutyCycleSweep = rndr(0, -3.528);
@@ -421,6 +425,8 @@ Params.prototype.hitHurt = function () {
     this.wave_type = NOISE;
   if (this.wave_type === SQUARE)
     this.p_duty = frnd(0.6);
+  if (this.wave_type === SAWTOOTH)
+    this.p_duty = 1;
   this.p_base_freq = 0.2 + frnd(0.6);
   this.p_freq_ramp = -0.3 - frnd(0.4);
   this.p_env_attack = 0;
@@ -438,6 +444,8 @@ Knobs.prototype.hitHurt = function () {
     this.shape = NOISE;
   if (this.shape === SQUARE)
     this.dutyCycle = rndr(0.2, 0.5);
+  if (this.shape === SAWTOOTH)
+    this.dutyCycle = 0;
   this.frequency = rndr(145, 2261);
   this.frequencySlide = rndr(-17.2, -217.9);
   this.attack = 0;
@@ -485,11 +493,28 @@ Params.prototype.blipSelect = function () {
   this.wave_type = rnd(1);
   if (this.wave_type === SQUARE)
     this.p_duty = frnd(0.6);
+  else
+    this.p_duty = 1;
   this.p_base_freq = 0.2 + frnd(0.4);
   this.p_env_attack = 0;
   this.p_env_sustain = 0.1 + frnd(0.1);
   this.p_env_decay = frnd(0.2);
   this.p_hpf_freq = 0.1;
+  return this;
+}
+
+
+Knobs.prototype.blipSelect = function () {
+  this.shape = rnd(1);
+  if (this.shape === SQUARE)
+    this.dutyCycle = rndr(0.2, 0.5);
+  else
+    this.dutyCycle = 0;
+  this.frequency = rndr(145, 1274);
+  this.attack = 0;
+  this.sustain = rndr(0.023, 0.09);
+  this.decay = frnd(0.09);
+  this.highPassFrequency = 353;
   return this;
 }
 
