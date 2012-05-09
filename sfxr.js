@@ -68,6 +68,7 @@ Knobs.prototype.translate = function (ps) {
   function log(x, b) { return Math.log(x) / Math.log(b); }
   var pow = Math.pow;
 
+  this.shape = ps.wave_type;
 
   this.attack = sqr(ps.p_env_attack) * 100000 / 44100;
   this.sustain = sqr(ps.p_env_sustain) * 100000 / 44100;
@@ -179,6 +180,9 @@ function frnd(range) {
   return Math.random() * range;
 }
 
+function rndr(from, to) {
+  return Math.random() * (to - from) + from;
+}
 
 function rnd(max) {
   return Math.floor(Math.random() * (max + 1));
@@ -203,20 +207,35 @@ Params.prototype.pickupCoin = function () {
 }
 
 
+Knobs.prototype.pickupCoin = function () {
+  this.frequency = rndr(568, 2861);
+  this.attack = 0.0;
+  this.sustain = frnd(0.227);
+  this.decay = rndr(0.227, 0.567);
+  this.punch = rndr(0.3, 0.6);
+  if (rnd(1)) {
+    this.arpeggioFactor = rndr(1.037, 1.479);
+    this.arpeggioDelay = rndr(0.042, 0.114);
+  }
+  return this;
+}
+
+
 Params.prototype.laserShoot = function () {
   this.wave_type = rnd(2);
   if(this.wave_type === SINE && rnd(1))
     this.wave_type = rnd(1);
-  this.p_base_freq = 0.5 + frnd(0.5);
-  this.p_freq_limit = this.p_base_freq - 0.2 - frnd(0.6);
-  if (this.p_freq_limit < 0.2) this.p_freq_limit = 0.2;
-  this.p_freq_ramp = -0.15 - frnd(0.2);
   if (rnd(2) === 0) {
     this.p_base_freq = 0.3 + frnd(0.6);
     this.p_freq_limit = frnd(0.1);
     this.p_freq_ramp = -0.35 - frnd(0.3);
+  } else {
+    this.p_base_freq = 0.5 + frnd(0.5);
+    this.p_freq_limit = this.p_base_freq - 0.2 - frnd(0.6);
+    if (this.p_freq_limit < 0.2) this.p_freq_limit = 0.2;
+    this.p_freq_ramp = -0.15 - frnd(0.2);
   }
-  if (rnd(1)) {
+  if (0 && rnd(1)) {
     this.p_duty = frnd(0.5);
     this.p_duty_ramp = frnd(0.2);
   } else {
@@ -232,8 +251,44 @@ Params.prototype.laserShoot = function () {
     this.p_pha_offset = frnd(0.2);
     this.p_pha_ramp = -frnd(0.2);
   }
-  if (rnd(1))
+  //if (rnd(1))
     this.p_hpf_freq = frnd(0.3);
+
+  return this;
+}
+
+
+Knobs.prototype.laserShoot = function () {
+  this.shape = rnd(2);
+  if(this.shape === SINE && rnd(1))
+    this.shape = rnd(1);
+  if (rnd(2) === 0) {
+    this.frequency = rndr(321, 2861);
+    this.frequencyMin = frnd(38.8);
+    this.frequencySlide = rndr(-27.3, -174.5);
+  } else {
+    this.frequency = rndr(321, 3532);
+    this.frequencyMin = rndr(144, 2/3 * this.frequency);
+    this.frequencySlide = rndr(-2.15, -27.27);
+  }
+  if (rnd(1)) {
+    this.dutyCycle = rndr(1/4, 1/2);
+    this.dutyCycleSweep = rndr(0, -3.528);
+  } else {
+    this.dutyCycle = rndr(0.05, 0.3);
+    this.dutyCycleSweep = frnd(12.35);
+  }
+  this.attack = 0;
+  this.sustain = rndr(0.02, 0.2);
+  this.decay = frnd(0.36);
+  if (rnd(1))
+    this.punch = frnd(0.3);
+  if (rnd(2) === 0) {
+    this.flangerOffset = frnd(0.001);
+    this.flangerSweep = -frnd(0.04);
+  }
+  if (rnd(1))
+    this.highPassFrequency = frnd(3204);
 
   return this;
 }
