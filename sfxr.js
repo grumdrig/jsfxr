@@ -416,10 +416,6 @@ Knobs.prototype.powerUp = function () {
 
 
 Params.prototype.hitHurt = function () {
-  if (typeof n !== 'undefined') {
-    frnd = function (x) { return x * n }
-    rnd = function (x) { return n % x }
-  }
   this.wave_type = rnd(2);
   if (this.wave_type === SINE)
     this.wave_type = NOISE;
@@ -432,6 +428,23 @@ Params.prototype.hitHurt = function () {
   this.p_env_decay = 0.1 + frnd(0.2);
   if (rnd(1))
     this.p_hpf_freq = frnd(0.3);
+  return this;
+}
+
+
+Knobs.prototype.hitHurt = function () {
+  this.shape = rnd(2);
+  if (this.shape === SINE)
+    this.shape = NOISE;
+  if (this.shape === SQUARE)
+    this.dutyCycle = rndr(0.2, 0.5);
+  this.frequency = rndr(145, 2261);
+  this.frequencySlide = rndr(-17.2, -217.9);
+  this.attack = 0;
+  this.sustain = frnd(0.023);
+  this.decay = rndr(0.023, 0.2);
+  if (rnd(1))
+    this.highPassFrequency = frnd(3204);
   return this;
 }
 
