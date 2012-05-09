@@ -62,7 +62,7 @@ console.log('\nDIFF <knobs >params\n');
 diff(a, b)
 */
 
-var x = 'laserShoot';
+var x = 'explosion';
 
 var sound = new sfxr.SoundEffect(new sfxr.Knobs()[x]()).generate();
 require("fs").writeFile("./test.wav", new Buffer(sound.wav), 'binary', 

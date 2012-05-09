@@ -61,13 +61,15 @@ function Knobs(settings) {
   }
 }
 
-Knobs.prototype.translate = function (ps) {
-  function sqr(x) { return x * x }
-  function cube(x) { return x * x * x }
-  function sign(x) { return x < 0 ? -1 : 1 }
-  function log(x, b) { return Math.log(x) / Math.log(b); }
-  var pow = Math.pow;
 
+function sqr(x) { return x * x }
+function cube(x) { return x * x * x }
+function sign(x) { return x < 0 ? -1 : 1 }
+function log(x, b) { return Math.log(x) / Math.log(b); }
+var pow = Math.pow;
+
+
+Knobs.prototype.translate = function (ps) {
   this.shape = ps.wave_type;
 
   this.attack = sqr(ps.p_env_attack) * 100000 / 44100;
@@ -297,13 +299,12 @@ Knobs.prototype.laserShoot = function () {
 Params.prototype.explosion = function () {
   this.wave_type = NOISE;
   if (rnd(1)) {
-    this.p_base_freq = 0.1 + frnd(0.4);
+    this.p_base_freq = sqr(0.1 + frnd(0.4));
     this.p_freq_ramp = -0.1 + frnd(0.4);
   } else {
-    this.p_base_freq = 0.2 + frnd(0.7);
+    this.p_base_freq = sqr(0.2 + frnd(0.7));
     this.p_freq_ramp = -0.2 - frnd(0.2);
   }
-  this.p_base_freq *= this.p_base_freq;
   if (rnd(4) === 0)
     this.p_freq_ramp = 0.0;
   if (rnd(2) === 0)
@@ -311,7 +312,7 @@ Params.prototype.explosion = function () {
   this.p_env_attack = 0.0;
   this.p_env_sustain = 0.1 + frnd(0.3);
   this.p_env_decay = frnd(0.5);
-  if (rnd(1) === 0) {
+  if (rnd(1)) {
     this.p_pha_offset = -0.3 + frnd(0.9);
     this.p_pha_ramp = -frnd(0.3);
   }
@@ -325,6 +326,39 @@ Params.prototype.explosion = function () {
     this.p_arp_mod = 0.8 - frnd(1.6);
   }
 
+  return this;
+}
+
+
+Knobs.prototype.explosion = function () {
+  this.shape = NOISE;
+  if (rnd(1)) {
+    this.frequency = rndr(4, 224);
+    this.frequencySlide = rndr(-0.623, 17.2);
+  } else {
+    this.frequency = rndr(9, 2318);
+    this.frequencySlide = rndr(-5.1, -40.7);
+  }
+  if (rnd(4) === 0)
+    this.frequencySlide = 0;
+  if (rnd(2) === 0)
+    this.retriggerRate = rndr(4.5, 53);
+  this.attack = 0;
+  this.sustain = rndr(0.0227, 0.363);
+  this.decay = frnd(0.567);
+  if (rnd(1)) {
+    this.flangerOffset = rndr(-0.0021, 0.0083);
+    this.flangerSweep = -frnd(0.09);
+  }
+  this.punch = 0.2 + frnd(0.6);
+  if (rnd(1)) {
+    this.vibratoDepth = frnd(0.35);
+    this.vibratoRate = frnd(24.8);
+  }
+  if (rnd(2) === 0) {
+    this.arpeggioFactor = rndr(0.135, 2.358);
+    this.arpeggioDelay = rndr(0.00526, 0.0733);
+  }
   return this;
 }
 
