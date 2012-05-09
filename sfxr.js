@@ -370,12 +370,11 @@ Params.prototype.powerUp = function () {
   } else {
     this.p_duty = frnd(0.6);
   }
+  this.p_base_freq = 0.2 + frnd(0.3);
   if (rnd(1)) {
-    this.p_base_freq = 0.2 + frnd(0.3);
     this.p_freq_ramp = 0.1 + frnd(0.4);
     this.p_repeat_speed = 0.4 + frnd(0.4);
   } else {
-    this.p_base_freq = 0.2 + frnd(0.3);
     this.p_freq_ramp = 0.05 + frnd(0.2);
     if (rnd(1)) {
       this.p_vib_strength = frnd(0.7);
@@ -385,6 +384,32 @@ Params.prototype.powerUp = function () {
   this.p_env_attack = 0.0;
   this.p_env_sustain = frnd(0.4);
   this.p_env_decay = 0.1 + frnd(0.4);
+
+  return this;
+}
+
+
+Knobs.prototype.powerUp = function () {
+  if (rnd(1)) {
+    this.shape = SAWTOOTH;
+    this.dutyCycle = 0;
+  } else {
+    this.dutyCycle = rndr(0.2, 0.5);
+  }
+  this.frequency = rndr(145, 886);
+  if (rnd(1)) {
+    this.frequencySlide = rndr(0.636, 79.6);
+    this.retriggerRate = rndr(6, 53);
+  } else {
+    this.frequencySlide = rndr(0.0795, 9.94);
+    if (rnd(1)) {
+      this.vibratoDepth = frnd(0.35);
+      this.vibratoRate = frnd(24.8);
+    }
+  }
+  this.attack = 0;
+  this.sustain = frnd(0.363);
+  this.decay = rndr(0.023, 0.57);
 
   return this;
 }
