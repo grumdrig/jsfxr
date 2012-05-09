@@ -413,7 +413,7 @@ Params.prototype.random = function () {
 
 
 Params.prototype.tone = function () {
-  this.wave_tuype = SINE;
+  this.wave_type = SINE;
   this.p_base_freq = 0.35173364; // 440 Hz
   this.p_env_attack = 0;
   this.p_env_sustain = 0.6641; // 1 sec
@@ -770,17 +770,14 @@ SoundEffectByUI.prototype.generate =
 }
 
 
-/*
-Params.prototype.tone = function () {
-  this.wave_tuype = SINE;
-  this.p_base_freq = 0.35173364; // 440 Hz
-  this.p_env_attack = 0;
-  this.p_env_sustain = 0.6641; // 1 sec
-  this.p_env_decay = 0;
-  this.p_env_punch = 0;
+Knobs.prototype.tone = function () {
+  this.shape = SINE;
+  this.frequency = 440;
+  this.attack = 0;
+  this.sustain = 1;
+  this.decay = 0;
   return this;
 }
-*/
 
 
 var genners = 'pickupCoin,laserShoot,explosion,powerUp,hitHurt,jump,blipSelect,random,tone'.split(',');
