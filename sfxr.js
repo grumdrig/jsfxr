@@ -75,7 +75,11 @@ Knobs.prototype.translate = function (ps) {
   this.decay = sqr(ps.p_env_decay) * 100000 / 44100;
 
   this.frequency = 8 * 441 * (sqr(ps.p_base_freq) + 0.001);
-  this.frequencyMin = 8 * 441 * (sqr(ps.p_freq_limit) + 0.001);
+  if (ps.p_freq_limit > 0)
+    this.frequencyMin = 8 * 441 * (sqr(ps.p_freq_limit) + 0.001);
+  else
+    this.frequencyMin = 0;
+  this.enableFrequencyCutoff = (ps.p_freq_limit > 0);
   this.frequencySlide = 44100 * log(1 - cube(ps.p_freq_ramp) / 100, 0.5);
   this.frequencySlideSlide = -cube(ps.p_freq_dramp) / 1000000 * 
     44100 * pow(2, 44101/44100);
@@ -99,9 +103,10 @@ Knobs.prototype.translate = function (ps) {
     sqr(ps.p_pha_offset) * 1020 / 44100;
   this.flangerSweep = sign(ps.p_pha_ramp) * sqr(ps.p_pha_ramp);
 
+  this.enableLowPassFilter = (ps.p_lpf_freq != 1);
   function flurp(x) { return x / (1-x) }
-  this.lowPassFrequency = Math.round(8 * 44100 * 
-                                     flurp(cube(ps.p_lpf_freq) / 10));
+  this.lowPassFrequency = ps.p_lpf_freq === 1 ? 44100 :
+    Math.round(8 * 44100 * flurp(cube(ps.p_lpf_freq) / 10));
   this.lowPassSweep = pow(1 + ps.p_lpf_ramp / 10000, 44100);
   this.lowPassResonance = 1 - (5 / (1 + sqr(ps.p_lpf_resonance) * 20)) / 9;
 
@@ -195,15 +200,6 @@ Params.prototype.pickupCoin = function () {
     this.p_arp_mod = 0.2 + frnd(0.4);
   }
   return this;
-}
-
-var genners = 'pickupCoin,laserShoot,explosion,powerUp,hitHurt,jump,blipSelect,random,tone'.split(',');
-for (var i = 0; i < genners.length; ++i) {
-  (function (g) {
-    Knobs.prototype[g] = function () {
-      return this.translate(new Params()[g]());
-    }
-  })(genners[i]);
 }
 
 
@@ -440,7 +436,7 @@ function SoundEffectByUI(ps) {
 
     this.period = 100 / (ps.p_base_freq * ps.p_base_freq + 0.001);
     this.periodMax = 100 / (ps.p_freq_limit * ps.p_freq_limit + 0.001);
-    this.enableFrequencyCutoff = (ps.p_freq_limit > 0.0);
+    this.enableFrequencyCutoff = (ps.p_freq_limit > 0);
     this.periodMult = 1 - Math.pow(ps.p_freq_ramp, 3) * 0.01;
     this.periodMultSlide = -Math.pow(ps.p_freq_dramp, 3) * 0.000001;
 
@@ -500,7 +496,7 @@ function SoundEffectByUI(ps) {
   this.sampleRate = ps.sample_rate;
   this.bitsPerChannel = ps.sample_size;
 
-  // for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
+  for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
 }
 
 
@@ -537,11 +533,11 @@ function SoundEffect(ps) {
   this.fltw = ps.lowPassFrequency / (8 * 44100 + ps.lowPassFrequency);
   this.enableLowPassFilter = ps.lowPassFrequency < 44100;
   this.fltw_d = Math.pow(ps.lowPassSweep, 1/44100);
-  this.fltdmp = ps.lowPassResonance * (.01 + this.fltw);
+  this.fltdmp = (1 - ps.lowPassResonance) * 9 * (.01 + this.fltw);
 
   // High pass filter
   this.flthp = ps.highPassFrequency / (8 * 44100 + ps.highPassFrequency);
-  this.flthp_d = 1 + Math.pow(ps.highPassSweep, 1/44100);
+  this.flthp_d = Math.pow(ps.highPassSweep, 1/44100);
 
   // Vibrato
   this.vibratoSpeed = ps.vibratoRate * 64 / 44100 / 10;
@@ -567,8 +563,6 @@ function SoundEffect(ps) {
 
   this.sampleRate = ps.sampleRate;
   this.bitsPerChannel = ps.sampleSize;
-
-  //for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
 }
 
 
@@ -774,6 +768,31 @@ SoundEffectByUI.prototype.generate =
   wave.clipping = num_clipped;
   return wave;
 }
+
+
+/*
+Params.prototype.tone = function () {
+  this.wave_tuype = SINE;
+  this.p_base_freq = 0.35173364; // 440 Hz
+  this.p_env_attack = 0;
+  this.p_env_sustain = 0.6641; // 1 sec
+  this.p_env_decay = 0;
+  this.p_env_punch = 0;
+  return this;
+}
+*/
+
+
+var genners = 'pickupCoin,laserShoot,explosion,powerUp,hitHurt,jump,blipSelect,random,tone'.split(',');
+for (var i = 0; i < genners.length; ++i) {
+  (function (g) {
+    if (!Knobs.prototype[g])
+      Knobs.prototype[g] = function () {
+        return this.translate(new Params()[g]());
+      }
+  })(genners[i]);
+}
+
 
 
 // For node.js
