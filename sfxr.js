@@ -7,7 +7,7 @@ var NOISE = 3;
 
 
 // Playback volume
-var masterVolume = 1.0;
+var masterVolume = 1;
 
 
 var defaultKnobs = {
@@ -91,8 +91,8 @@ Knobs.prototype.translate = function (ps) {
   this.vibratoDepth = ps.p_vib_strength / 2;
 
   this.arpeggioFactor = 1 / ((ps.p_arp_mod >= 0) ? 
-                             1.0 - sqr(ps.p_arp_mod) * 0.9 : 
-                             1.0 + sqr(ps.p_arp_mod) * 10);
+                             1 - sqr(ps.p_arp_mod) * 0.9 : 
+                             1 + sqr(ps.p_arp_mod) * 10);
   this.arpeggioDelay = ((ps.p_arp_speed === 1) ? 0 :
                 Math.floor(sqr(1 - ps.p_arp_speed) * 20000 + 32) / 44100);
 
@@ -134,42 +134,42 @@ function Params() {
   this.wave_type = SQUARE;
 
   // Envelope
-  this.p_env_attack = 0.0;   // Attack time
+  this.p_env_attack = 0;   // Attack time
   this.p_env_sustain = 0.3;  // Sustain time
-  this.p_env_punch = 0.0;    // Sustain punch
+  this.p_env_punch = 0;    // Sustain punch
   this.p_env_decay = 0.4;    // Decay time
 
   // Tone
   this.p_base_freq = 0.3;    // Start frequency
-  this.p_freq_limit = 0.0;   // Min frequency cutoff
-  this.p_freq_ramp = 0.0;    // Slide (SIGNED)
-  this.p_freq_dramp = 0.0;   // Delta slide (SIGNED)
+  this.p_freq_limit = 0;   // Min frequency cutoff
+  this.p_freq_ramp = 0;    // Slide (SIGNED)
+  this.p_freq_dramp = 0;   // Delta slide (SIGNED)
   // Vibrato
-  this.p_vib_strength = 0.0; // Vibrato depth
-  this.p_vib_speed = 0.0;    // Vibrato speed
+  this.p_vib_strength = 0; // Vibrato depth
+  this.p_vib_speed = 0;    // Vibrato speed
 
   // Tonal change
-  this.p_arp_mod = 0.0;      // Change amount (SIGNED)
-  this.p_arp_speed = 0.0;    // Change speed
+  this.p_arp_mod = 0;      // Change amount (SIGNED)
+  this.p_arp_speed = 0;    // Change speed
 
   // Square wave duty (proportion of time signal is high vs. low)
-  this.p_duty = 0.0;         // Square duty
-  this.p_duty_ramp = 0.0;    // Duty sweep (SIGNED)
+  this.p_duty = 0;         // Square duty
+  this.p_duty_ramp = 0;    // Duty sweep (SIGNED)
 
   // Repeat
-  this.p_repeat_speed = 0.0; // Repeat speed
+  this.p_repeat_speed = 0; // Repeat speed
 
   // Flanger
-  this.p_pha_offset = 0.0;   // Flanger offset (SIGNED)
-  this.p_pha_ramp = 0.0;     // Flanger sweep (SIGNED)
+  this.p_pha_offset = 0;   // Flanger offset (SIGNED)
+  this.p_pha_ramp = 0;     // Flanger sweep (SIGNED)
 
   // Low-pass filter
-  this.p_lpf_freq = 1.0;     // Low-pass filter cutoff
-  this.p_lpf_ramp = 0.0;     // Low-pass filter cutoff sweep (SIGNED)
-  this.p_lpf_resonance = 0.0;// Low-pass filter resonance
+  this.p_lpf_freq = 1;     // Low-pass filter cutoff
+  this.p_lpf_ramp = 0;     // Low-pass filter cutoff sweep (SIGNED)
+  this.p_lpf_resonance = 0;// Low-pass filter resonance
   // High-pass filter
-  this.p_hpf_freq = 0.0;     // High-pass filter cutoff
-  this.p_hpf_ramp = 0.0;     // High-pass filter cutoff sweep (SIGNED)
+  this.p_hpf_freq = 0;     // High-pass filter cutoff
+  this.p_hpf_ramp = 0;     // High-pass filter cutoff sweep (SIGNED)
 
   // Sample parameters
   this.sound_vol = 0.5;
@@ -197,7 +197,7 @@ function rnd(max) {
 
 Params.prototype.pickupCoin = function () {
   this.p_base_freq = 0.4 + frnd(0.5);
-  this.p_env_attack = 0.0;
+  this.p_env_attack = 0;
   this.p_env_sustain = frnd(0.1);
   this.p_env_decay = 0.1 + frnd(0.4);
   this.p_env_punch = 0.3 + frnd(0.3);
@@ -211,7 +211,7 @@ Params.prototype.pickupCoin = function () {
 
 Knobs.prototype.pickupCoin = function () {
   this.frequency = rndr(568, 2861);
-  this.attack = 0.0;
+  this.attack = 0;
   this.sustain = frnd(0.227);
   this.decay = rndr(0.227, 0.567);
   this.punch = rndr(0.3, 0.6);
@@ -244,7 +244,7 @@ Params.prototype.laserShoot = function () {
     this.p_duty = 0.4 + frnd(0.5);
     this.p_duty_ramp = -frnd(0.7);
   }
-  this.p_env_attack = 0.0;
+  this.p_env_attack = 0;
   this.p_env_sustain = 0.1 + frnd(0.2);
   this.p_env_decay = frnd(0.4);
   if (rnd(1))
@@ -306,10 +306,10 @@ Params.prototype.explosion = function () {
     this.p_freq_ramp = -0.2 - frnd(0.2);
   }
   if (rnd(4) === 0)
-    this.p_freq_ramp = 0.0;
+    this.p_freq_ramp = 0;
   if (rnd(2) === 0)
     this.p_repeat_speed = 0.3 + frnd(0.5);
-  this.p_env_attack = 0.0;
+  this.p_env_attack = 0;
   this.p_env_sustain = 0.1 + frnd(0.3);
   this.p_env_decay = frnd(0.5);
   if (rnd(1)) {
@@ -381,7 +381,7 @@ Params.prototype.powerUp = function () {
       this.p_vib_speed = frnd(0.6);
     }
   }
-  this.p_env_attack = 0.0;
+  this.p_env_attack = 0;
   this.p_env_sustain = frnd(0.4);
   this.p_env_decay = 0.1 + frnd(0.4);
 
@@ -416,6 +416,10 @@ Knobs.prototype.powerUp = function () {
 
 
 Params.prototype.hitHurt = function () {
+  if (typeof n !== 'undefined') {
+    frnd = function (x) { return x * n }
+    rnd = function (x) { return n % x }
+  }
   this.wave_type = rnd(2);
   if (this.wave_type === SINE)
     this.wave_type = NOISE;
@@ -423,7 +427,7 @@ Params.prototype.hitHurt = function () {
     this.p_duty = frnd(0.6);
   this.p_base_freq = 0.2 + frnd(0.6);
   this.p_freq_ramp = -0.3 - frnd(0.4);
-  this.p_env_attack = 0.0;
+  this.p_env_attack = 0;
   this.p_env_sustain = frnd(0.1);
   this.p_env_decay = 0.1 + frnd(0.2);
   if (rnd(1))
@@ -437,13 +441,13 @@ Params.prototype.jump = function () {
   this.p_duty = frnd(0.6);
   this.p_base_freq = 0.3 + frnd(0.3);
   this.p_freq_ramp = 0.1 + frnd(0.2);
-  this.p_env_attack = 0.0;
+  this.p_env_attack = 0;
   this.p_env_sustain = 0.1 + frnd(0.3);
   this.p_env_decay = 0.1 + frnd(0.2);
   if (rnd(1))
     this.p_hpf_freq = frnd(0.3);
   if (rnd(1))
-    this.p_lpf_freq = 1.0 - frnd(0.6);
+    this.p_lpf_freq = 1 - frnd(0.6);
   return this;
 }
 
@@ -453,7 +457,7 @@ Params.prototype.blipSelect = function () {
   if (this.wave_type === SQUARE)
     this.p_duty = frnd(0.6);
   this.p_base_freq = 0.2 + frnd(0.4);
-  this.p_env_attack = 0.0;
+  this.p_env_attack = 0;
   this.p_env_sustain = 0.1 + frnd(0.1);
   this.p_env_decay = frnd(0.2);
   this.p_hpf_freq = 0.1;
@@ -488,40 +492,40 @@ Params.prototype.mutate = function () {
 
 
 Params.prototype.random = function () {
-  this.p_base_freq = Math.pow(frnd(2.0) - 1.0, 2.0);
+  this.p_base_freq = Math.pow(frnd(2.0) - 1, 2);
   if (rnd(1))
-    this.p_base_freq = Math.pow(frnd(2.0) - 1.0, 3.0) + 0.5;
-  this.p_freq_limit = 0.0;
-  this.p_freq_ramp = Math.pow(frnd(2.0) - 1.0, 5.0);
+    this.p_base_freq = Math.pow(frnd(2) - 1, 3) + 0.5;
+  this.p_freq_limit = 0;
+  this.p_freq_ramp = Math.pow(frnd(2) - 1, 5);
   if (this.p_base_freq > 0.7 && this.p_freq_ramp > 0.2)
     this.p_freq_ramp = -this.p_freq_ramp;
   if (this.p_base_freq < 0.2 && this.p_freq_ramp < -0.05)
     this.p_freq_ramp = -this.p_freq_ramp;
-  this.p_freq_dramp = Math.pow(frnd(2.0) - 1.0, 3.0);
-  this.p_duty = frnd(2.0) - 1.0;
-  this.p_duty_ramp = Math.pow(frnd(2.0) - 1.0, 3.0);
-  this.p_vib_strength = Math.pow(frnd(2.0) - 1.0, 3.0);
-  this.p_vib_speed = frnd(2.0) - 1.0;
-  this.p_env_attack = Math.pow(frnd(2.0) - 1.0, 3.0);
-  this.p_env_sustain = Math.pow(frnd(2.0) - 1.0, 2.0);
-  this.p_env_decay = frnd(2.0) - 1.0;
-  this.p_env_punch = Math.pow(frnd(0.8), 2.0);
+  this.p_freq_dramp = Math.pow(frnd(2) - 1, 3);
+  this.p_duty = frnd(2) - 1;
+  this.p_duty_ramp = Math.pow(frnd(2) - 1, 3);
+  this.p_vib_strength = Math.pow(frnd(2) - 1, 3);
+  this.p_vib_speed = frnd(2) - 1;
+  this.p_env_attack = Math.pow(frnd(2) - 1, 3);
+  this.p_env_sustain = Math.pow(frnd(2) - 1, 2);
+  this.p_env_decay = frnd(2) - 1;
+  this.p_env_punch = Math.pow(frnd(0.8), 2);
   if (this.p_env_attack + this.p_env_sustain + this.p_env_decay < 0.2) {
     this.p_env_sustain += 0.2 + frnd(0.3);
     this.p_env_decay += 0.2 + frnd(0.3);
   }
-  this.p_lpf_resonance = frnd(2.0) - 1.0;
-  this.p_lpf_freq = 1.0 - Math.pow(frnd(1.0), 3.0);
-  this.p_lpf_ramp = Math.pow(frnd(2.0) - 1.0, 3.0);
+  this.p_lpf_resonance = frnd(2) - 1;
+  this.p_lpf_freq = 1 - Math.pow(frnd(1), 3);
+  this.p_lpf_ramp = Math.pow(frnd(2) - 1, 3);
   if (this.p_lpf_freq < 0.1 && this.p_lpf_ramp < -0.05)
     this.p_lpf_ramp = -this.p_lpf_ramp;
-  this.p_hpf_freq = Math.pow(frnd(1.0), 5.0);
-  this.p_hpf_ramp = Math.pow(frnd(2.0) - 1.0, 5.0);
-  this.p_pha_offset = Math.pow(frnd(2.0) - 1.0, 3.0);
-  this.p_pha_ramp = Math.pow(frnd(2.0) - 1.0, 3.0);
-  this.p_repeat_speed = frnd(2.0) - 1.0;
-  this.p_arp_speed = frnd(2.0) - 1.0;
-  this.p_arp_mod = frnd(2.0) - 1.0;
+  this.p_hpf_freq = Math.pow(frnd(1), 5);
+  this.p_hpf_ramp = Math.pow(frnd(2) - 1, 5);
+  this.p_pha_offset = Math.pow(frnd(2) - 1, 3);
+  this.p_pha_ramp = Math.pow(frnd(2) - 1, 3);
+  this.p_repeat_speed = frnd(2) - 1;
+  this.p_arp_speed = frnd(2) - 1;
+  this.p_arp_mod = frnd(2) - 1;
   return this;
 }
 
@@ -557,12 +561,12 @@ function SoundEffectByUI(ps) {
     this.dutyCycle = 0.5 - ps.p_duty * 0.5;
     this.dutyCycleSlide = -ps.p_duty_ramp * 0.00005;
 
-    if (ps.p_arp_mod >= 0.0)
-      this.arpeggioMultiplier = 1 - Math.pow(ps.p_arp_mod, 2.0) * .9;
+    if (ps.p_arp_mod >= 0)
+      this.arpeggioMultiplier = 1 - Math.pow(ps.p_arp_mod, 2) * .9;
     else
-      this.arpeggioMultiplier = 1 + Math.pow(ps.p_arp_mod, 2.0) * 10;
-    this.arpeggioTime = Math.floor(Math.pow(1.0 - ps.p_arp_speed, 2.0) * 20000 + 32);
-    if (ps.p_arp_speed === 1.0)
+      this.arpeggioMultiplier = 1 + Math.pow(ps.p_arp_mod, 2) * 10;
+    this.arpeggioTime = Math.floor(Math.pow(1 - ps.p_arp_speed, 2) * 20000 + 32);
+    if (ps.p_arp_speed === 1)
       this.arpeggioTime = 0;
   }
 
@@ -572,37 +576,37 @@ function SoundEffectByUI(ps) {
   this.waveShape = parseInt(ps.wave_type);
 
   // Filter
-  this.fltw = Math.pow(ps.p_lpf_freq, 3.0) * 0.1;
+  this.fltw = Math.pow(ps.p_lpf_freq, 3) * 0.1;
   this.enableLowPassFilter = (ps.p_lpf_freq != 1);
-  this.fltw_d = 1.0 + ps.p_lpf_ramp * 0.0001;
-  this.fltdmp = 5.0 / (1.0 + Math.pow(ps.p_lpf_resonance, 2.0) * 20.0) *
+  this.fltw_d = 1 + ps.p_lpf_ramp * 0.0001;
+  this.fltdmp = 5 / (1 + Math.pow(ps.p_lpf_resonance, 2) * 20) *
     (0.01 + this.fltw);
   if (this.fltdmp > 0.8) this.fltdmp=0.8;
-  this.flthp = Math.pow(ps.p_hpf_freq, 2.0) * 0.1;
-  this.flthp_d = 1.0 + ps.p_hpf_ramp * 0.0003;
+  this.flthp = Math.pow(ps.p_hpf_freq, 2) * 0.1;
+  this.flthp_d = 1 + ps.p_hpf_ramp * 0.0003;
 
   // Vibrato
-  this.vibratoSpeed = Math.pow(ps.p_vib_speed, 2.0) * 0.01;
+  this.vibratoSpeed = Math.pow(ps.p_vib_speed, 2) * 0.01;
   this.vibratoAmplitude = ps.p_vib_strength * 0.5;
 
   // Envelope
   this.envelopeLength = [
-    Math.floor(ps.p_env_attack * ps.p_env_attack * 100000.0),
-    Math.floor(ps.p_env_sustain * ps.p_env_sustain * 100000.0),
-    Math.floor(ps.p_env_decay * ps.p_env_decay * 100000.0)
+    Math.floor(ps.p_env_attack * ps.p_env_attack * 100000),
+    Math.floor(ps.p_env_sustain * ps.p_env_sustain * 100000),
+    Math.floor(ps.p_env_decay * ps.p_env_decay * 100000)
   ];
   this.envelopePunch = ps.p_env_punch;
 
   // Flanger
-  this.flangerOffset = Math.pow(ps.p_pha_offset, 2.0) * 1020.0;
-  if (ps.p_pha_offset < 0.0) this.flangerOffset = -this.flangerOffset;
-  this.flangerOffsetSlide = Math.pow(ps.p_pha_ramp, 2.0) * 1.0;
-  if (ps.p_pha_ramp < 0.0) this.flangerOffsetSlide = -this.flangerOffsetSlide;
+  this.flangerOffset = Math.pow(ps.p_pha_offset, 2) * 1020;
+  if (ps.p_pha_offset < 0) this.flangerOffset = -this.flangerOffset;
+  this.flangerOffsetSlide = Math.pow(ps.p_pha_ramp, 2) * 1;
+  if (ps.p_pha_ramp < 0) this.flangerOffsetSlide = -this.flangerOffsetSlide;
 
   // Repeat
-  this.repeatTime = Math.floor(Math.pow(1.0 - ps.p_repeat_speed, 2.0) * 20000
+  this.repeatTime = Math.floor(Math.pow(1 - ps.p_repeat_speed, 2) * 20000
                                + 32);
-  if (ps.p_repeat_speed === 0.0)
+  if (ps.p_repeat_speed === 0)
     this.repeatTime = 0;
 
   this.gain = Math.exp(ps.sound_vol) - 1;
@@ -682,24 +686,24 @@ function SoundEffect(ps) {
 
 SoundEffectByUI.prototype.generate =
     SoundEffect.prototype.generate = function () {
-  var fltp = 0.0;
-  var fltdp = 0.0;
-  var fltphp = 0.0;
+  var fltp = 0;
+  var fltdp = 0;
+  var fltphp = 0;
 
   var noise_buffer = Array(32);
   for (var i = 0; i < 32; ++i)
-    noise_buffer[i] = Math.random() * 2.0 - 1.0;
+    noise_buffer[i] = Math.random() * 2 - 1;
 
   var envelopeStage = 0;
   var envelopeElapsed = 0;
 
-  var vibratoPhase = 0.0;
+  var vibratoPhase = 0;
 
   var phase = 0;
   var ipp = 0;
   var flanger_buffer = Array(1024);
   for (var i = 0; i < 1024; ++i)
-    flanger_buffer[i] = 0.0;
+    flanger_buffer[i] = 0;
 
   var num_clipped = 0;
 
@@ -732,16 +736,16 @@ SoundEffectByUI.prototype.generate =
 
     // Vibrato
     var rfperiod = this.period;
-    if (this.vibratoAmplitude > 0.0) {
+    if (this.vibratoAmplitude > 0) {
       vibratoPhase += this.vibratoSpeed;
-      rfperiod = this.period * (1.0 + Math.sin(vibratoPhase) * this.vibratoAmplitude);
+      rfperiod = this.period * (1 + Math.sin(vibratoPhase) * this.vibratoAmplitude);
     }
     var iperiod = Math.floor(rfperiod);
     if (iperiod < 8) iperiod = 8;
 
     // Square wave duty cycle
     this.dutyCycle += this.dutyCycleSlide;
-    if (this.dutyCycle < 0.0) this.dutyCycle = 0.0;
+    if (this.dutyCycle < 0) this.dutyCycle = 0;
     if (this.dutyCycle > 0.5) this.dutyCycle = 0.5;
 
     // Volume envelope
@@ -756,11 +760,11 @@ SoundEffectByUI.prototype.generate =
       env_vol = envelopeElapsed / this.envelopeLength[0];
     } else if (envelopeStage === 1) {
       // Sustain
-      env_vol = 1.0 + Math.pow(1.0 - envelopeElapsed / this.envelopeLength[1],
-                               1.0) * 2.0 * this.envelopePunch;
+      env_vol = 1 + Math.pow(1 - envelopeElapsed / this.envelopeLength[1],
+                               1) * 2 * this.envelopePunch;
     } else {
       // Decay
-      env_vol = 1.0 - envelopeElapsed / this.envelopeLength[2];
+      env_vol = 1 - envelopeElapsed / this.envelopeLength[2];
     }
 
     // Flanger step
@@ -768,7 +772,7 @@ SoundEffectByUI.prototype.generate =
     var iphase = Math.abs(Math.floor(this.flangerOffset));
     if (iphase > 1023) iphase = 1023;
 
-    if (this.flthp_d != 0.0) {
+    if (this.flthp_d != 0) {
       this.flthp *= this.flthp_d;
       if (this.flthp < 0.00001)
         this.flthp = 0.00001;
@@ -785,7 +789,7 @@ SoundEffectByUI.prototype.generate =
         phase %= iperiod;
         if (this.waveShape === NOISE)
           for(var i = 0; i < 32; ++i)
-            noise_buffer[i] = Math.random() * 2.0 - 1.0;
+            noise_buffer[i] = Math.random() * 2 - 1;
       }
 
       // Base waveform
@@ -811,14 +815,14 @@ SoundEffectByUI.prototype.generate =
       // Low-pass filter
       var pp = fltp;
       this.fltw *= this.fltw_d;
-      if (this.fltw < 0.0) this.fltw = 0.0;
+      if (this.fltw < 0) this.fltw = 0;
       if (this.fltw > 0.1) this.fltw = 0.1;
       if (this.enableLowPassFilter) {
         fltdp += (sub_sample - fltp) * this.fltw;
         fltdp -= fltdp * this.fltdmp;
       } else {
         fltp = sub_sample;
-        fltdp = 0.0;
+        fltdp = 0;
       }
       fltp += fltdp;
 
@@ -850,7 +854,7 @@ SoundEffectByUI.prototype.generate =
     sample *= this.gain;
 
     if (this.bitsPerChannel === 8) {
-      // Rescale [-1.0, 1.0) to [0, 256)
+      // Rescale [-1, 1) to [0, 256)
       sample = Math.floor((sample + 1) * 128);
       if (sample > 255) {
         sample = 255;
@@ -861,7 +865,7 @@ SoundEffectByUI.prototype.generate =
       }
       buffer.push(sample);
     } else {
-      // Rescale [-1.0, 1.0) to [-32768, 32768)
+      // Rescale [-1, 1) to [-32768, 32768)
       sample = Math.floor(sample * (1<<15));
       if (sample >= (1<<15)) {
         sample = (1 << 15)-1;
