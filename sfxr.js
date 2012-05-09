@@ -465,6 +465,22 @@ Params.prototype.jump = function () {
 }
 
 
+Knobs.prototype.jump = function () {
+  this.shape = SQUARE;
+  this.dutyCycle = rndr(0.2, 0.5);
+  this.frequency = rndr(321, 1274);
+  this.frequencySlide = rndr(0.64, 17.2);
+  this.attack = 0;
+  this.sustain = rndr(0.023, 0.36);
+  this.decay = rndr(0.023, 0.2);
+  if (rnd(1))
+    this.highPassFrequency = frnd(3204);
+  if (rnd(1))
+    this.lowPassFrequency = rndr(2272, 44100);
+  return this;
+}
+
+
 Params.prototype.blipSelect = function () {
   this.wave_type = rnd(1);
   if (this.wave_type === SQUARE)
