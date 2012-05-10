@@ -546,9 +546,10 @@ Params.prototype.mutate = function () {
 
 
 Params.prototype.random = function () {
-  this.p_base_freq = Math.pow(frnd(2.0) - 1, 2);
   if (rnd(1))
-    this.p_base_freq = Math.pow(frnd(2) - 1, 3) + 0.5;
+    this.p_base_freq = cube(frnd(2) - 1) + 0.5;
+  else
+    this.p_base_freq = sqr(frnd(1));
   this.p_freq_limit = 0;
   this.p_freq_ramp = Math.pow(frnd(2) - 1, 5);
   if (this.p_base_freq > 0.7 && this.p_freq_ramp > 0.2)
@@ -559,16 +560,16 @@ Params.prototype.random = function () {
   this.p_duty = frnd(2) - 1;
   this.p_duty_ramp = Math.pow(frnd(2) - 1, 3);
   this.p_vib_strength = Math.pow(frnd(2) - 1, 3);
-  this.p_vib_speed = frnd(2) - 1;
-  this.p_env_attack = Math.pow(frnd(2) - 1, 3);
-  this.p_env_sustain = Math.pow(frnd(2) - 1, 2);
-  this.p_env_decay = frnd(2) - 1;
+  this.p_vib_speed = rndr(-1, 1);
+  this.p_env_attack = cube(rndr(-1, 1));
+  this.p_env_sustain = sqr(rndr(-1, 1));
+  this.p_env_decay = rndr(-1, 1);
   this.p_env_punch = Math.pow(frnd(0.8), 2);
   if (this.p_env_attack + this.p_env_sustain + this.p_env_decay < 0.2) {
     this.p_env_sustain += 0.2 + frnd(0.3);
     this.p_env_decay += 0.2 + frnd(0.3);
   }
-  this.p_lpf_resonance = frnd(2) - 1;
+  this.p_lpf_resonance = rndr(-1, 1);
   this.p_lpf_freq = 1 - Math.pow(frnd(1), 3);
   this.p_lpf_ramp = Math.pow(frnd(2) - 1, 3);
   if (this.p_lpf_freq < 0.1 && this.p_lpf_ramp < -0.05)
@@ -580,6 +581,45 @@ Params.prototype.random = function () {
   this.p_repeat_speed = frnd(2) - 1;
   this.p_arp_speed = frnd(2) - 1;
   this.p_arp_mod = frnd(2) - 1;
+  return this;
+}
+
+
+Knobs.prototype.random = function () {
+  if (rnd(1))
+    this.frequency = rndr(885.5, 7941.5);
+  else
+    this.frequency = rndr(3.5, 3532);
+  this.frequencySlide = rndr(-633, 639);
+  if (this.frequency > 1732 && this.frequencySlide > 5)
+    this.frequencySlide = -this.frequencySlide;
+  if (this.frequency < 145 && this.frequencySlide < -0.088)
+    this.frequencySlide = -this.frequencySlide;
+  this.frequencySlideSlide = rndr(-0.88, 0.88);
+  this.dutyCycle = frnd(1);
+  this.dudyCycleSweep = rndr(-17.64, 17.64);
+  this.vibratoDepth = rndr(-0.5, 0.5);
+  this.vibratoRate = rndr(0, 69);
+  this.attack = cube(frnd(1)) * 2.26;
+  this.sustain = sqr(frnd(1)) * 2.26 + 0.09;
+  this.decay = frnd(1) * 2.26;
+  this.punch = sqr(frnd(1)) * 0.64;
+  if (this.attack + this.sustain + this.decay < 0.45) {
+    this.sustain += rndr(0.5, 1.25);
+    this.decay += rndr(0.5, 1.25);
+  }
+  this.lowPassResonance = rndr(0.444, 0.97);
+  this.lowPassFrequency = frnd(39200);
+  this.lowPassSweep = rndr(0.012, 82);
+  if (this.lowPassFrequency < 35 && this.lowPassSweep < 0.802)
+    this.lowPassSweep = 1 - this.lowPassSweep;
+  this.highPassFrequency = 39200 * pow(frnd(1), 5);
+  this.highPassSweep = 555718 * pow(rndr(-1, 1), 5);
+  this.flangerOffset = 0.023 * cube(frnd(2) - 1);
+  this.flangerSweep = cube(frnd(2) - 1);
+  this.retriggerRate = frnd(1378);
+  this.arpeggioDelay = frnd(1.81);
+  this.arpeggioFactor = rndr(0.09, 10);
   return this;
 }
 
