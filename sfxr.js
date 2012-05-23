@@ -10,6 +10,9 @@ var NOISE = 3;
 var masterVolume = 1;
 
 
+var OVERSAMPLING = 8;
+
+
 var defaultKnobs = {
   shape: SQUARE, // SQUARE/SAWTOOTH/SINE/NOISE
 
@@ -872,7 +875,6 @@ SoundEffectByUI.prototype.generate =
     }
 
     // 8x oversampling
-    var OVERSAMPLING = 8;
     var sample = 0;
     for (var si = 0; si < OVERSAMPLING; ++si) {
       var sub_sample = 0;
