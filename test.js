@@ -31,7 +31,7 @@ function diff(a, b, title) {
 }
 
 
-//var sound = new sfxr.SoundEffectByUI((new sfxr.Params()).tone()).generate();
+//var sound = new sfxr.SoundEffect((new sfxr.Params()).tone()).generate();
 /*
 var knobs = new sfxr.Knobs({
   shape: sfxr.SAWTOOTH,
@@ -53,7 +53,7 @@ console.log("\nKNOBS FOR IT\n");
 dump(new sfxr.Knobs().tone());
 
 console.log("\nPARAMS TONE\n")
-dump(b = new sfxr.SoundEffectByUI(new sfxr.Params().tone()));
+dump(b = new sfxr.SoundEffect(new sfxr.Params().tone()));
 
 console.log("\nPARAMS FOR IT\n")
 dump(new sfxr.Params().tone());
@@ -70,7 +70,7 @@ require("fs").writeFile("./test.wav", new Buffer(sound.wav), 'binary',
                           if(err) {
                             sys.puts(err);
                           } else {
-                            sys.puts("The file was saved!");
+                            sys.puts("test.wav saved!");
                           }
                         });
 

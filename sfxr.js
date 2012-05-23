@@ -639,8 +639,15 @@ Params.prototype.tone = function () {
 
 
 
-function SoundEffectByUI(ps) {
+function SoundEffect(ps) {
+  if (ps.oldParams)
+    this.initFromUI(ps);
+  else
+    this.init(ps);
+}
 
+
+SoundEffect.prototype.initFromUI = function (ps) {
   //
   // Convert user-facing parameter values to units usable by the sound
   // generator
@@ -716,8 +723,7 @@ function SoundEffectByUI(ps) {
 
 
 
-function SoundEffect(ps) {
-
+SoundEffect.prototype.init = function (ps) {
   //
   // Convert user-facing parameter values to units usable by the sound
   // generator
@@ -781,8 +787,7 @@ function SoundEffect(ps) {
 }
 
 
-SoundEffectByUI.prototype.generate =
-    SoundEffect.prototype.generate = function () {
+SoundEffect.prototype.generate = function () {
   var fltp = 0;
   var fltdp = 0;
   var fltphp = 0;
@@ -1010,7 +1015,6 @@ if (typeof exports !== 'undefined')  {
   exports.Params = Params;
   exports.Knobs = Knobs;
   exports.SoundEffect = SoundEffect;
-  exports.SoundEffectByUI = SoundEffectByUI;
   exports.SQUARE = SQUARE;
   exports.SAWTOOTH = SAWTOOTH;
   exports.SINE = SINE;
