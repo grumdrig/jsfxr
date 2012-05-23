@@ -77,9 +77,9 @@ Knobs.prototype.translate = function (ps) {
   this.punch = ps.p_env_punch;
   this.decay = sqr(ps.p_env_decay) * 100000 / 44100;
 
-  this.frequency = 8 * 441 * (sqr(ps.p_base_freq) + 0.001);
+  this.frequency = OVERSAMPLING * 441 * (sqr(ps.p_base_freq) + 0.001);
   if (ps.p_freq_limit > 0)
-    this.frequencyMin = 8 * 441 * (sqr(ps.p_freq_limit) + 0.001);
+    this.frequencyMin = OVERSAMPLING * 441 * (sqr(ps.p_freq_limit) + 0.001);
   else
     this.frequencyMin = 0;
   this.enableFrequencyCutoff = (ps.p_freq_limit > 0);
@@ -97,7 +97,7 @@ Knobs.prototype.translate = function (ps) {
                 Math.floor(sqr(1 - ps.p_arp_speed) * 20000 + 32) / 44100);
 
   this.dutyCycle = (1 - ps.p_duty) / 2;
-  this.dutyCycleSweep = 8 * 44100 * -ps.p_duty_ramp / 20000;
+  this.dutyCycleSweep = OVERSAMPLING * 44100 * -ps.p_duty_ramp / 20000;
 
   this.retriggerRate = 44100 / ((ps.p_repeat_speed === 0) ? 0 :
                        Math.floor(sqr(1 - ps.p_repeat_speed) * 20000) + 32);
@@ -109,11 +109,11 @@ Knobs.prototype.translate = function (ps) {
   this.enableLowPassFilter = (ps.p_lpf_freq != 1);
   function flurp(x) { return x / (1-x) }
   this.lowPassFrequency = ps.p_lpf_freq === 1 ? 44100 :
-    Math.round(8 * 44100 * flurp(cube(ps.p_lpf_freq) / 10));
+    Math.round(OVERSAMPLING * 44100 * flurp(cube(ps.p_lpf_freq) / 10));
   this.lowPassSweep = pow(1 + ps.p_lpf_ramp / 10000, 44100);
   this.lowPassResonance = 1 - (5 / (1 + sqr(ps.p_lpf_resonance) * 20)) / 9;
 
-  this.highPassFrequency = Math.round(8 * 44100 * 
+  this.highPassFrequency = Math.round(OVERSAMPLING * 44100 * 
                                       flurp(sqr(ps.p_hpf_freq) / 10));
   this.highPassSweep = pow(1 + ps.p_hpf_ramp * 0.0003, 44100);
 
@@ -723,15 +723,15 @@ function SoundEffect(ps) {
   this.initForRepeat = function() {
     this.elapsedSinceRepeat = 0;
 
-    this.period = 8 * 44100 / ps.frequency;
-    this.periodMax = 8 * 44100 / ps.frequencyMin;
+    this.period = OVERSAMPLING * 44100 / ps.frequency;
+    this.periodMax = OVERSAMPLING * 44100 / ps.frequencyMin;
     this.enableFrequencyCutoff = (ps.frequencyMin > 0);
     this.periodMult = Math.pow(.5, ps.frequencySlide / 44100);
     this.periodMultSlide = ps.frequencySlideSlide * Math.pow(2, -44101/44100)
       / 44100;
 
     this.dutyCycle = ps.dutyCycle;
-    this.dutyCycleSlide = ps.dutyCycleSweep / (8 * 44100);
+    this.dutyCycleSlide = ps.dutyCycleSweep / (OVERSAMPLING * 44100);
 
     this.arpeggioMultiplier = 1 / ps.arpeggioFactor;
     this.arpeggioTime = ps.arpeggioDelay * 44100;
@@ -742,13 +742,13 @@ function SoundEffect(ps) {
   this.waveShape = ps.shape;
 
   // Low pass filter
-  this.fltw = ps.lowPassFrequency / (8 * 44100 + ps.lowPassFrequency);
+  this.fltw = ps.lowPassFrequency / (OVERSAMPLING * 44100 + ps.lowPassFrequency);
   this.enableLowPassFilter = ps.lowPassFrequency < 44100;
   this.fltw_d = Math.pow(ps.lowPassSweep, 1/44100);
   this.fltdmp = (1 - ps.lowPassResonance) * 9 * (.01 + this.fltw);
 
   // High pass filter
-  this.flthp = ps.highPassFrequency / (8 * 44100 + ps.highPassFrequency);
+  this.flthp = ps.highPassFrequency / (OVERSAMPLING * 44100 + ps.highPassFrequency);
   this.flthp_d = Math.pow(ps.highPassSweep, 1/44100);
 
   // Vibrato
@@ -835,7 +835,7 @@ SoundEffectByUI.prototype.generate =
       rfperiod = this.period * (1 + Math.sin(vibratoPhase) * this.vibratoAmplitude);
     }
     var iperiod = Math.floor(rfperiod);
-    if (iperiod < 8) iperiod = 8;
+    if (iperiod < OVERSAMPLING) iperiod = OVERSAMPLING;
 
     // Square wave duty cycle
     this.dutyCycle += this.dutyCycleSlide;
@@ -872,8 +872,9 @@ SoundEffectByUI.prototype.generate =
     }
 
     // 8x oversampling
+    var OVERSAMPLING = 8;
     var sample = 0;
-    for (var si = 0; si < 8; ++si) {
+    for (var si = 0; si < OVERSAMPLING; ++si) {
       var sub_sample = 0;
       phase++;
       if (phase >= iperiod) {
@@ -941,7 +942,7 @@ SoundEffectByUI.prototype.generate =
       continue;
     }
 
-    sample = sample / 8 * masterVolume;
+    sample = sample / OVERSAMPLING * masterVolume;
     sample *= this.gain;
 
     if (this.bitsPerChannel === 8) {
