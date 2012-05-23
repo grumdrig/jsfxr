@@ -849,16 +849,13 @@ SoundEffectByUI.prototype.generate =
         break;
     }
     var env_vol;
-    if (envelopeStage === 0) {
-      // Attack
-      env_vol = envelopeElapsed / this.envelopeLength[0];
-    } else if (envelopeStage === 1) {
-      // Sustain
-      env_vol = 1 + Math.pow(1 - envelopeElapsed / this.envelopeLength[1],
-                               1) * 2 * this.envelopePunch;
-    } else {
-      // Decay
-      env_vol = 1 - envelopeElapsed / this.envelopeLength[2];
+    var envf = envelopeElapsed / this.envelopeLength[envelopeStage];
+    if (envelopeStage === 0) {         // Attack
+      env_vol = envf;
+    } else if (envelopeStage === 1) {  // Sustain
+      env_vol = 1 + (1 - envf) * 2 * this.envelopePunch;
+    } else {                           // Decay
+      env_vol = 1 - envf;
     }
 
     // Flanger step
