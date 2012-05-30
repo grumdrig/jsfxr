@@ -72,6 +72,7 @@ function log(x, b) { return Math.log(x) / Math.log(b); }
 var pow = Math.pow;
 
 
+// Translate from UI-friendly settings to human-friendly ones
 Knobs.prototype.translate = function (ps) {
   this.shape = ps.wave_type;
 
