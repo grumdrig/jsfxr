@@ -1,9 +1,9 @@
 jsfxr
 =====
 
-Dead easy game sound effects generator.
+Quick 'n' easy game sound effects generator.
 
-A port of _sfxr: http://www.drpetter.se/project_sfxr.html to HTML5.
+A port of sfxr: http://www.drpetter.se/project_sfxr.html to HTML5.
 
 
 Links
@@ -17,5 +17,6 @@ Source code:  https://github.com/grumdrig/jsfxr/
 Thanks
 ------
 
- _riffwave.js: http://www.codebase.es/riffwave/ and 
- _jquery-ui:   (http://jqueryui.com/
+ riffwave.js: http://www.codebase.es/riffwave/
+
+ jquery-ui:   http://jqueryui.com/
