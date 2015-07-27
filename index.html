@@ -63,6 +63,20 @@ function play(noregen) {
   }, 0);
 }
 
+function serialize_params() {
+  $("textarea").val(JSON.stringify(PARAMS, null, 2));
+  $("#serialize").show();
+}
+
+function deserialize_params() {
+  var newPARAMS = JSON.parse($("textarea").val());
+  for (var p in newPARAMS) {
+    PARAMS[p] = newPARAMS[p];
+  }
+  play();
+  updateUi();
+}
+
 function disenable() {
   var duty = PARAMS.wave_type == SQUARE || PARAMS.wave_type == SAWTOOTH;
   $("#p_duty").slider("option", "disabled", !duty);
@@ -374,11 +388,23 @@ a {
 }
 
 #data {
-  width: 100%;
+  width: 80%;
+  margin-top: 1em;
 }
 
 #data textarea {
-  width: 100%;
+  width: 80%;
+  height: 40em;
+  margin-top: 1em;
+  min-width: 250px;
+}
+
+#serialize {
+  display: none;
+}
+
+#serialize > button {
+  margin-top: 1em;
 }
 
 </script>
@@ -527,18 +553,16 @@ To save the sound, right- or control-click the following link, select
 by DrPetter)
 </p>
 
-
-
 </div>
-
 <br/>
-<br/>
-
-
-<br/>
-
-
-
-
+<div id="data">
+  <button onclick="serialize_params();"> ▼ Serialize</button>
+  <button onclick="deserialize_params()"> ▲ Deserialize</button>
+  <div id="serialize">
+    <textarea></textarea>
+    <button onclick="$('textarea').select();">Select</button>
+    <button onclick="$('#serialize').hide();">Hide ✕</button>
+  </div>
+</div>
 </body>
 </html>
