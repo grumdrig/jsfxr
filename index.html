@@ -285,7 +285,11 @@ h1 {
 }
 
 body {
-  padding-left: 2em;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 800px;
+  width: 90%;
+  text-align: center;
 }
 
 .slider {
@@ -322,6 +326,23 @@ hr {
 
 #demo-frame > div.demo { padding: 10px !important; }
 
+div.demo {
+   text-align: center;
+   margin-left: auto;
+   margin-right: auto;
+}
+
+table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div#export {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 #stats td {
   text-align: right;
 }
@@ -350,6 +371,14 @@ a {
 
 #generators button {
   margin-bottom: 2px;
+}
+
+#data {
+  width: 100%;
+}
+
+#data textarea {
+  width: 100%;
 }
 
 </script>
@@ -434,7 +463,7 @@ a {
 
 </div>
 
-<div>
+<div id="export">
   <h2>Sound</h2>
   <button onclick="play(true)">Play</button> <br/>
 
