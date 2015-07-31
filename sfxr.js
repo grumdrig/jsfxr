@@ -787,8 +787,7 @@ SoundEffect.prototype.init = function (ps) {
   this.bitsPerChannel = ps.sampleSize;
 }
 
-// the raw parameter returns an array buffer instead of base64 wave if true
-SoundEffect.prototype.generate = function (raw) {
+SoundEffect.prototype.generate = function () {
   var fltp = 0;
   var fltdp = 0;
   var fltphp = 0;
@@ -979,20 +978,18 @@ SoundEffect.prototype.generate = function (raw) {
     }
   }
 
-  if (raw) {
-    // normalize buffer
-    for (var b=0; b<buffer.length; b++) {
-      buffer[b] = 2.0 * buffer[b] / pow(2, this.bitsPerChannel) - 1.0;
-    }
-    return buffer;
-  } else {
-    var wave = new RIFFWAVE();
-    wave.header.sampleRate = this.sampleRate;
-    wave.header.bitsPerSample = this.bitsPerChannel;
-    wave.Make(buffer);
-    wave.clipping = num_clipped;
-    return wave;
+  // normalize buffer
+  var normalized = [];
+  for (var b=0; b<buffer.length; b++) {
+    normalized[b] = 2.0 * buffer[b] / pow(2, this.bitsPerChannel) - 1.0;
   }
+  var wave = new RIFFWAVE();
+  wave.header.sampleRate = this.sampleRate;
+  wave.header.bitsPerSample = this.bitsPerChannel;
+  wave.Make(buffer);
+  wave.clipping = num_clipped;
+  wave.buffer = normalized;
+  return wave;
 }
 
 
