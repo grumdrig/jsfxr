@@ -1013,12 +1013,26 @@ for (var i = 0; i < genners.length; ++i) {
   })(genners[i]);
 }
 
-
-
-// For node.js
-if (typeof module !== 'undefined')  {
-  var RIFFWAVE = require("./riffwave").RIFFWAVE;
-  module.exports = {
+(function (root, factory) {
+  if(typeof define === "function" && define.amd) {
+    // Now we're wrapping the factory and assigning the return
+    // value to the root (window) and returning it as well to
+    // the AMD loader.
+    define(["RIFFWAVE"], function(RIFFWAVE){
+      return (root.jsfxr = factory(RIFFWAVE));
+    });
+  } else if(typeof module === "object" && module.exports) {
+    // I've not encountered a need for this yet, since I haven't
+    // run into a scenario where plain modules depend on CommonJS
+    // *and* I happen to be loading in a CJS browser environment
+    // but I'm including it for the sake of being thorough
+    module.exports = (root.jsfxr = factory(require("RIFFWAVE")));
+  } else {
+    root.jsfxr = factory(root.RIFFWAVE);
+  }
+}(this, function(RIFFWAVE) {
+  // module code here....
+  return {
     "Params": Params,
     "Knobs": Knobs,
     "SoundEffect": SoundEffect,
@@ -1026,6 +1040,5 @@ if (typeof module !== 'undefined')  {
     "SAWTOOTH": SAWTOOTH,
     "SINE": SINE,
     "NOISE": NOISE
-  }
-}
-
+  };
+}));
