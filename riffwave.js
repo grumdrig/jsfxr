@@ -117,6 +117,6 @@ var RIFFWAVE = function(data) {
 
 }; // end RIFFWAVE
 
-
-if (typeof exports != 'undefined')  // For node.js
-  exports.RIFFWAVE = RIFFWAVE;
+if (typeof module != 'undefined') { // For node.js
+  module.exports = {"RIFFWAVE": RIFFWAVE};
+}

@@ -1016,13 +1016,16 @@ for (var i = 0; i < genners.length; ++i) {
 
 
 // For node.js
-if (typeof exports !== 'undefined')  {
+if (typeof module !== 'undefined')  {
   var RIFFWAVE = require("./riffwave").RIFFWAVE;
-  exports.Params = Params;
-  exports.Knobs = Knobs;
-  exports.SoundEffect = SoundEffect;
-  exports.SQUARE = SQUARE;
-  exports.SAWTOOTH = SAWTOOTH;
-  exports.SINE = SINE;
-  exports.NOISE = NOISE;
+  module.exports = {
+    "Params": Params,
+    "Knobs": Knobs,
+    "SoundEffect": SoundEffect,
+    "SQUARE": SQUARE,
+    "SAWTOOTH": SAWTOOTH,
+    "SINE": SINE,
+    "NOISE": NOISE
+  }
 }
+
