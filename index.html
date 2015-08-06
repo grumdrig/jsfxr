@@ -47,9 +47,15 @@ function mut() {
   play();
 }
 
+// check for procedural audio
+var actx = null;
+if ('AudioContext' in window) {
+  actx = new AudioContext();
+} else if ('webkitAudioContext' in window) {
+  actx = new webkitAudioContext();
+}
+
 function play(noregen) {
-  setTimeout(function () { 
-    var audio = new Audio();
     if (!noregen) {
       SOUND = new SoundEffect(PARAMS).generate();
       $("#file_size").text(Math.round(SOUND.wav.length / 1024) + "kB");
@@ -57,11 +63,29 @@ function play(noregen) {
                              (SOUND.header.bitsPerSample >> 3));
       $("#clipping").text(SOUND.clipping);
     }
-    audio.src = SOUND.dataURI;
+    
     $("#wav").attr("href", SOUND.dataURI);
     $("#sfx").attr("href", "sfx.wav?" + PARAMS.query());
-    audio.play(); 
-  }, 0);
+    
+    if (actx) {
+      var buff = actx.createBuffer(1, SOUND.buffer.length, SOUND.header.sampleRate);
+      var nowBuffering = buff.getChannelData(0);
+      for (var i=0;i<SOUND.buffer.length;i++) {
+        nowBuffering[i] = SOUND.buffer[i];
+      }
+      proc = actx.createBufferSource();
+      proc.buffer = buff;
+      proc.connect(actx.destination);
+      if ('AudioContext' in window) {
+        proc.start();
+      } else if ('webkitAudioContext' in window) {
+        proc.noteOn(0);
+      }
+    } else {
+      var audio = new Audio();
+      audio.src = SOUND.dataURI;
+      audio.play(); 
+    }
 }
 
 function serialize_params() {

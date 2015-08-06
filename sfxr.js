@@ -787,7 +787,6 @@ SoundEffect.prototype.init = function (ps) {
   this.bitsPerChannel = ps.sampleSize;
 }
 
-
 SoundEffect.prototype.generate = function () {
   var fltp = 0;
   var fltdp = 0;
@@ -979,11 +978,17 @@ SoundEffect.prototype.generate = function () {
     }
   }
 
+  // normalize buffer
+  var normalized = Float32Array(buffer.length);;
+  for (var b=0; b<buffer.length; b++) {
+    normalized[b] = 2.0 * buffer[b] / pow(2, this.bitsPerChannel) - 1.0;
+  }
   var wave = new RIFFWAVE();
   wave.header.sampleRate = this.sampleRate;
   wave.header.bitsPerSample = this.bitsPerChannel;
   wave.Make(buffer);
   wave.clipping = num_clipped;
+  wave.buffer = normalized;
   return wave;
 }
 
@@ -1008,16 +1013,32 @@ for (var i = 0; i < genners.length; ++i) {
   })(genners[i]);
 }
 
-
-
-// For node.js
-if (typeof exports !== 'undefined')  {
-  var RIFFWAVE = require("./riffwave").RIFFWAVE;
-  exports.Params = Params;
-  exports.Knobs = Knobs;
-  exports.SoundEffect = SoundEffect;
-  exports.SQUARE = SQUARE;
-  exports.SAWTOOTH = SAWTOOTH;
-  exports.SINE = SINE;
-  exports.NOISE = NOISE;
-}
+(function (root, factory) {
+  if(typeof define === "function" && define.amd) {
+    // Now we're wrapping the factory and assigning the return
+    // value to the root (window) and returning it as well to
+    // the AMD loader.
+    define(["RIFFWAVE"], function(RIFFWAVE){
+      return (root.jsfxr = factory(RIFFWAVE));
+    });
+  } else if(typeof module === "object" && module.exports) {
+    // I've not encountered a need for this yet, since I haven't
+    // run into a scenario where plain modules depend on CommonJS
+    // *and* I happen to be loading in a CJS browser environment
+    // but I'm including it for the sake of being thorough
+    module.exports = (root.jsfxr = factory(require("RIFFWAVE")));
+  } else {
+    root.jsfxr = factory(root.RIFFWAVE);
+  }
+}(this, function(RIFFWAVE) {
+  // module code here....
+  return {
+    "Params": Params,
+    "Knobs": Knobs,
+    "SoundEffect": SoundEffect,
+    "SQUARE": SQUARE,
+    "SAWTOOTH": SAWTOOTH,
+    "SINE": SINE,
+    "NOISE": NOISE
+  };
+}));
