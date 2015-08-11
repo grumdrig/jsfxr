@@ -299,7 +299,7 @@ function rnd(max) {
 
 
 Params.prototype.pickupCoin = function () {
-  this.wave_type = SAW;
+  this.wave_type = SAWTOOTH;
   this.p_base_freq = 0.4 + frnd(0.5);
   this.p_env_attack = 0;
   this.p_env_sustain = frnd(0.1);
