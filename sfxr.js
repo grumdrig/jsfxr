@@ -979,7 +979,7 @@ SoundEffect.prototype.generate = function () {
   }
 
   // normalize buffer
-  var normalized = Float32Array(buffer.length);;
+  var normalized = new Float32Array(buffer.length);
   for (var b=0; b<buffer.length; b++) {
     normalized[b] = 2.0 * buffer[b] / pow(2, this.bitsPerChannel) - 1.0;
   }
