@@ -35,8 +35,13 @@ function gen(fx) {
   PARAMS.sound_vol = SOUND_VOL;
   PARAMS.sample_rate = SAMPLE_RATE;
   PARAMS.sample_size = SAMPLE_SIZE;
-  PARAMS[fx]();
-  $("#wav").text(fx + ".wav");
+  if (fx.indexOf("#") == 0) {
+    PARAMS.fromB58(fx.slice(1));
+    $("#wav").text("random.wav");
+  } else {
+    PARAMS[fx]();
+    $("#wav").text(fx + ".wav");
+  }
   updateUi();
   play();
 }
@@ -57,6 +62,10 @@ if ('AudioContext' in window) {
 
 function play(noregen) {
     if (!noregen) {
+      // document.location.hash = PARAMS.toB58();
+      var b58 = PARAMS.toB58();
+      $("#permalink").text("permalink");
+      $("#permalink").attr("href", "#" + b58)
       SOUND = new SoundEffect(PARAMS).generate();
       $("#file_size").text(Math.round(SOUND.wav.length / 1024) + "kB");
       $("#num_samples").text(SOUND.header.subChunk2Size / 
@@ -268,8 +277,8 @@ $(function() {
     control.convert = CONVERSIONS[p];
     control.units = UNITS[p];
   }
-
-  gen("pickupCoin");
+  
+  gen(document.location.hash || "pickupCoin");
 });
 
 function convert(control, v) {
@@ -524,6 +533,7 @@ To save the sound, right- or control-click the following link, select
   <br/>
   <a id="wav">sfx.wav</a> <br/>
   <!-- <a id="sfx">sfx.wav</a><br/> -->
+  <a id="permalink"></a> <br/>
 
   <table id="stats">
   <tr><th>File size:<td id="file_size">
