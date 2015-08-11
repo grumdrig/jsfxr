@@ -181,6 +181,105 @@ function Params() {
   this.sample_size = 8;
 }
 
+// http://stackoverflow.com/questions/3096646/how-to-convert-a-floating-point-number-to-its-binary-representation-ieee-754-i
+function assembleFloat(sign, exponent, mantissa)
+{
+    return (sign << 31) | (exponent << 23) | (mantissa);
+}
+
+function floatToNumber(flt)
+{
+    if (isNaN(flt)) // Special case: NaN
+        return assembleFloat(0, 0xFF, 0x1337); // Mantissa is nonzero for NaN
+
+    var sign = (flt < 0) ? 1 : 0;
+    flt = Math.abs(flt);
+    if (flt == 0.0) // Special case: +-0
+        return assembleFloat(sign, 0, 0);
+
+    var exponent = Math.floor(Math.log(flt) / Math.LN2);
+    if (exponent > 127 || exponent < -126) // Special case: +-Infinity (and huge numbers)
+        return assembleFloat(sign, 0xFF, 0); // Mantissa is zero for +-Infinity
+
+    var mantissa = flt / Math.pow(2, exponent);
+    return assembleFloat(sign, exponent + 127, (mantissa * Math.pow(2, 23)) & 0x7FFFFF);
+}
+
+// http://stackoverflow.com/a/16001019
+function numberToFloat(bytes) {
+    var sign = (bytes & 0x80000000) ? -1 : 1;
+    var exponent = ((bytes >> 23) & 0xFF) - 127;
+    var significand = (bytes & ~(-1 << 23));
+
+    if (exponent == 128) 
+        return sign * ((significand) ? Number.NaN : Number.POSITIVE_INFINITY);
+
+    if (exponent == -127) {
+        if (significand == 0) return sign * 0.0;
+        exponent = -126;
+        significand /= (1 << 22);
+    } else significand = (significand | (1 << 23)) / (1 << 23);
+
+    return sign * significand * Math.pow(2, exponent);
+}
+
+// export parameter list to URL friendly base58 string
+// https://gist.github.com/diafygi/90a3e80ca1c2793220e5/
+var b58alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+var params_order = ["wave_type",
+"p_env_attack",
+"p_env_sustain",
+"p_env_punch",
+"p_env_decay",
+"p_base_freq",
+"p_freq_limit",
+"p_freq_ramp",
+"p_freq_dramp",
+"p_vib_strength",
+"p_vib_speed",
+"p_arp_mod",
+"p_arp_speed",
+"p_duty",
+"p_duty_ramp",
+"p_repeat_speed",
+"p_pha_offset",
+"p_pha_ramp",
+"p_lpf_freq",
+"p_lpf_ramp",
+"p_lpf_resonance",
+"p_hpf_freq",
+"p_hpf_ramp"];
+Params.prototype.toB58 = function() {
+  var convert = [];
+  for (var pi in params_order) {
+    var p = params_order[pi];
+    if (p == "wave_type") {
+      convert.push(this[p]);
+    } else if (p.indexOf("p_") == 0) {
+      var val = this[p];
+      val = floatToNumber(val);
+      convert.push(0xff & val);
+      convert.push(0xff & (val >> 8))
+      convert.push(0xff & (val >> 16))
+      convert.push(0xff & (val >> 24))
+    }
+  }
+  return function(B,A){var d=[],s="",i,j,c,n;for(i in B){j=0,c=B[i];s+=c||s.length^i?"":1;while(j in d||c){n=d[j];n=n?n*256+c:c;c=n/58|0;d[j]=n%58;j++}}while(j--)s+=A[d[j]];return s}(convert, b58alphabet);
+}
+
+Params.prototype.fromB58 = function(b58encoded) {
+  var decoded = function(S,A){var d=[],b=[],i,j,c,n;for(i in S){j=0,c=A.indexOf(S[i]);if(c<0)return undefined;c||b.length^i?i:b.push(0);while(j in d||c){n=d[j];n=n?n*58+c:c;c=n>>8;d[j]=n%256;j++}}while(j--)b.push(d[j]);return new Uint8Array(b)}(b58encoded,b58alphabet);
+  for (var pi in params_order) {
+    var p = params_order[pi];
+    var offset = (pi - 1) * 4 + 1;
+    if (p == "wave_type") {
+      this[p] = decoded[0];
+    } else {
+      var val = (decoded[offset] | (decoded[offset + 1] << 8) | (decoded[offset + 2] << 16) | (decoded[offset + 3] << 24));
+      this[p] = numberToFloat(val);
+    }
+  }
+}
 
 function frnd(range) {
   return Math.random() * range;
