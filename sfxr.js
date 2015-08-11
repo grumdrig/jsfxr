@@ -200,6 +200,7 @@ function rnd(max) {
 
 
 Params.prototype.pickupCoin = function () {
+  this.wave_type = SAW;
   this.p_base_freq = 0.4 + frnd(0.5);
   this.p_env_attack = 0;
   this.p_env_sustain = frnd(0.1);
@@ -550,6 +551,7 @@ Params.prototype.mutate = function () {
 
 
 Params.prototype.random = function () {
+  this.wave_type = rnd(3);
   if (rnd(1))
     this.p_base_freq = cube(frnd(2) - 1) + 0.5;
   else
@@ -590,6 +592,7 @@ Params.prototype.random = function () {
 
 
 Knobs.prototype.random = function () {
+  this.shape = rnd(3);
   if (rnd(1))
     this.frequency = rndr(885.5, 7941.5);
   else
