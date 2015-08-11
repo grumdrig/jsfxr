@@ -719,7 +719,7 @@ SoundEffect.prototype.initFromUI = function (ps) {
   this.sampleRate = ps.sample_rate;
   this.bitsPerChannel = ps.sample_size;
 
-  for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
+  // for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
 }
 
 
