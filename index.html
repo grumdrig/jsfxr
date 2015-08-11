@@ -62,8 +62,10 @@ if ('AudioContext' in window) {
 
 function play(noregen) {
     if (!noregen) {
-      // document.location.hash = PARAMS.toB58();
       var b58 = PARAMS.toB58();
+      if (document.location.href.indexOf("#") != -1) {
+        document.location.hash = PARAMS.toB58();
+      }
       $("#permalink").text("permalink");
       $("#permalink").attr("href", "#" + b58)
       SOUND = new SoundEffect(PARAMS).generate();
