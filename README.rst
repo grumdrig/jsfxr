@@ -10,9 +10,9 @@ use
 
 You can use the sounds you find in game code directly.
 
-Once you find a nice sound, click the `Serialize` button and copy the JSON.
+Once you find a nice sound, click the Serialize button and copy the JSON.
 
-Paste it into your code e.g.::
+Then you can use it in your code::
 
         var sound = {
           "oldParams": true,
@@ -43,9 +43,7 @@ Paste it into your code e.g.::
           "sample_rate": 44100,
           "sample_size": 8
         };
-
-Now you can use the sound like this::
-
+        
         var a = new Audio();
         var s = new SoundEffect(sound);
         a.src = s.dataURI;
@@ -54,8 +52,6 @@ Now you can use the sound like this::
 You can also access a buffer if you want to use WebAudio API::
 
         console.log(s.buffer)
-
-If you want to use 
 
 Links
 -----
