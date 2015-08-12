@@ -5,14 +5,14 @@ Quick 'n' easy game sound effects generator.
 
 A port of sfxr: http://www.drpetter.se/project_sfxr.html to HTML5.
 
+.. image:: screenshot.png
+
 use
 ===
 
-You can use the sounds you find in game code directly.
+You can use the sounds you make with sfxr in your game code.
 
-Once you find a nice sound, click the Serialize button and copy the JSON.
-
-Then you can use it in your code::
+Once you find a nice sound, click the Serialize button and copy the JSON code for the sound.::
 
         var sound = {
           "oldParams": true,
@@ -49,9 +49,15 @@ Then you can use it in your code::
         a.src = s.dataURI;
         a.play();
 
-You can also access a buffer if you want to use WebAudio API::
+You can also access an array of samples if you want to use the WebAudio API to play the sound.::
 
         console.log(s.buffer)
+
+There is example code for using the WebAudio API on lines 55_ and 81_ of the index.html_ file.
+
+.. _55: https://github.com/chr15m/jsfxr/blob/master/index.html#L55
+.. _81: https://github.com/chr15m/jsfxr/blob/master/index.html#L81
+.. _index.html: https://github.com/chr15m/jsfxr/blob/master/index.html
 
 Links
 -----
