@@ -12,7 +12,7 @@ use
 
 You can use the sounds you make with sfxr in your game code.
 
-Once you find a nice sound, click the Serialize button and copy the JSON code for the sound.::
+Once you find a nice sound, click the Serialize button and copy the JSON code for the sound::
 
         var sound = {
           "oldParams": true,
@@ -49,7 +49,7 @@ Once you find a nice sound, click the Serialize button and copy the JSON code fo
         a.src = s.dataURI;
         a.play();
 
-You can also access an array of samples if you want to use the WebAudio API to play the sound.::
+You can also access an array of samples if you want to use the WebAudio API to play the sound::
 
         console.log(s.buffer)
 
