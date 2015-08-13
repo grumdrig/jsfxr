@@ -66,8 +66,9 @@ function play(noregen) {
       if (document.location.href.indexOf("#") != -1) {
         document.location.hash = PARAMS.toB58();
       }
-      $("#permalink").text("permalink");
       $("#permalink").attr("href", "#" + b58)
+      $("#permalink").text(b58)
+      $("#share").attr("href", "#" + b58)
       SOUND = new SoundEffect(PARAMS).generate();
       $("#file_size").text(Math.round(SOUND.wav.length / 1024) + "kB");
       $("#num_samples").text(SOUND.header.subChunk2Size / 
@@ -323,6 +324,21 @@ button, p, #sound_vol {
   font-weight: bold;
 }
 
+#share {
+  font-weight: bold;
+  font-size: 1.25em;
+  margin-top: 1em;
+  display: inline-block;
+}
+
+#permalink {
+  font-size: 0.75em;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  display: block;
+  margin-top: 1em;
+}
 
 div {
   display: inline-block;
@@ -534,8 +550,8 @@ To save the sound, right- or control-click the following link, select
 "Save As..." and choose a name with a ".wav" extension. <br/>
   <br/>
   <a id="wav">sfx.wav</a> <br/>
+  <a id="share">share URL ⟫</a> <br/>
   <!-- <a id="sfx">sfx.wav</a><br/> -->
-  <a id="permalink"></a> <br/>
 
   <table id="stats">
   <tr><th>File size:<td id="file_size">
@@ -603,5 +619,6 @@ by DrPetter)
     <button onclick="$('#serialize').hide();">Hide ✕</button>
   </div>
 </div>
+<a id="permalink"></a>
 </body>
 </html>
