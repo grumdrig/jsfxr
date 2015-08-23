@@ -281,6 +281,14 @@ Params.prototype.fromB58 = function(b58encoded) {
   }
 }
 
+Params.prototype.fromJSON = function(struct) {
+  for (var p in struct) {
+    if (struct.hasOwnProperty(p)) {
+      this[p] = struct[p];
+    }
+  }
+}
+
 function frnd(range) {
   return Math.random() * range;
 }

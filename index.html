@@ -107,9 +107,7 @@ function serialize_params() {
 
 function deserialize_params() {
   var newPARAMS = JSON.parse($("textarea").val());
-  for (var p in newPARAMS) {
-    PARAMS[p] = newPARAMS[p];
-  }
+  PARAMS.fromJSON(newPARAMS);
   play();
   updateUi();
 }
