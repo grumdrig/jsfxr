@@ -44,10 +44,14 @@ Once you find a nice sound, click the Serialize button and copy the JSON code fo
           "sample_size": 8
         };
         
-        var a = new Audio();
-        var s = new SoundEffect(sound);
+        var s = new SoundEffect(sound).generate();
         // returns a webaudio object if supported, or an Audio object
-        s.getAudio.play();
+        s.getAudio().play();
+
+You can also use the short URL compressed version of the sound::
+
+        var s = new SoundEffect("5EoyNVSymuxD8s7HP1ixqdaCn5uVGEgwQ3kJBR7bSoApFQzm7E4zZPW2EcXm3jmNdTtTPeDuvwjY8z4exqaXz3NGBHRKBx3igYfBBMRBxDALhBSvzkF6VE2Pv").generate();
+        s.getAudio().play();
 
 You can also access an array of samples if you want to use the WebAudio API to play the sound::
 
