@@ -1099,9 +1099,48 @@ SoundEffect.prototype.generate = function () {
   wave.Make(buffer);
   wave.clipping = num_clipped;
   wave.buffer = normalized;
+  wave.getAudio = getAudioFn(wave);
   return wave;
 }
 
+
+var getAudioFn = function(wave) {
+  return function() {
+    // check for procedural audio
+    var actx = null;
+    if ('AudioContext' in window) {
+      actx = new AudioContext();
+    } else if ('webkitAudioContext' in window) {
+      actx = new webkitAudioContext();
+    }
+    
+    if (actx) {
+      var buff = actx.createBuffer(1, wave.buffer.length, wave.header.sampleRate);
+      var nowBuffering = buff.getChannelData(0);
+      for (var i=0;i<wave.buffer.length;i++) {
+        nowBuffering[i] = wave.buffer[i];
+      }
+      return {
+        "channels": [],
+        "play": function() {
+          var proc = actx.createBufferSource();
+          proc.buffer = buff;
+          proc.connect(actx.destination);
+          if ('AudioContext' in window) {
+            proc.start();
+          } else if ('webkitAudioContext' in window) {
+            proc.noteOn(0);
+          }
+          this.channels.push(proc);
+        }
+      };
+    } else {
+      var audio = new Audio();
+      audio.src = wave.dataURI;
+      return audio;
+    }
+  }
+}
 
 Knobs.prototype.tone = function () {
   this.shape = SINE;
