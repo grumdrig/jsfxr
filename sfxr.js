@@ -279,6 +279,7 @@ Params.prototype.fromB58 = function(b58encoded) {
       this[p] = numberToFloat(val);
     }
   }
+  return this;
 }
 
 Params.prototype.fromJSON = function(struct) {
@@ -287,6 +288,7 @@ Params.prototype.fromJSON = function(struct) {
       this[p] = struct[p];
     }
   }
+  return this;
 }
 
 function frnd(range) {
@@ -751,6 +753,13 @@ Params.prototype.tone = function () {
 
 
 function SoundEffect(ps) {
+  if (typeof(ps) == "string") {
+    var PARAMS = new Params();
+    if (ps.indexOf("#") == 0) {
+      ps = ps.slice(1);
+    }
+    ps = PARAMS.fromB58(ps);
+  }
   if (ps.oldParams)
     this.initFromUI(ps);
   else
