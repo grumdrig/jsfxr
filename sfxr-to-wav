@@ -25,6 +25,9 @@ for (a=2; a<process.argv.length; a++) {
     // grab the b58 synth definition from the command line
     parameters.fromB58(process.argv[a]);
     parameters.set = true;
+    if (outfile == "sfxr-sound.wav") {
+      outfile = process.argv[a] + ".wav";
+    }
   }
 }
 
