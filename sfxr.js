@@ -743,6 +743,34 @@ Knobs.prototype.random = function () {
   return this;
 }
 
+Params.prototype.synth = function () {
+  this.wave_type = rnd(1);
+  this.p_base_freq = rnd(1) ? 0.2477 : 0.1737;
+  this.p_env_attack = rnd(4) > 3 ? frnd(0.5) : 0;
+  this.p_env_sustain = frnd(1);
+  this.p_env_punch = frnd(1);
+  this.p_env_decay = frnd(0.9) + 0.1;
+  this.p_arp_mod = [0, 0, 0, 0, -0.3162, 0.7454, 0.7454][rnd(6)];
+  this.p_arp_speed = frnd(0.5) + 0.4;
+  this.p_duty = frnd(1);
+  this.p_duty_ramp = rnd(2) == 2 ? frnd(1) : 0;
+  this.p_lpf_freq = [1, frnd(1) * frnd(1)][rnd(1)];
+  this.p_lpf_ramp = rndr(-1, 1);
+  this.p_lpf_resonance = frnd(1);
+  this.p_hpf_freq = rnd(3) == 3 ? frnd(1) : 0;
+  this.p_hpf_ramp = rnd(3) == 3 ? frnd(1) : 0;
+}
+
+// doesn't seem to make a difference this is incomplete
+Knobs.prototype.synth = function () {
+  this.shape = rnd(1);
+  this.frequency = rnd(1) ? 220 : 110;
+  this.attack = rnd(4) > 3 ? frnd(0.5) * 2.26 : 0;
+  this.systain = frnd(1);
+  this.punch = frnd(1);
+  this.decay = frnd(0.9) + 0.1;
+  // TODO: fix this
+}
 
 Params.prototype.tone = function () {
   this.wave_type = SINE;
@@ -754,7 +782,14 @@ Params.prototype.tone = function () {
   return this;
 }
 
-
+Knobs.prototype.tone = function () {
+  this.shape = SINE;
+  this.frequency = 440;
+  this.attack = 0;
+  this.sustain = 1;
+  this.decay = 0;
+  return this;
+}
 
 function SoundEffect(ps) {
   if (typeof(ps) == "string") {
@@ -1155,17 +1190,8 @@ var getAudioFn = function(wave) {
   }
 }
 
-Knobs.prototype.tone = function () {
-  this.shape = SINE;
-  this.frequency = 440;
-  this.attack = 0;
-  this.sustain = 1;
-  this.decay = 0;
-  return this;
-}
 
-
-var genners = 'pickupCoin,laserShoot,explosion,powerUp,hitHurt,jump,blipSelect,random,tone'.split(',');
+var genners = 'pickupCoin,laserShoot,explosion,powerUp,hitHurt,jump,blipSelect,synth,random,tone'.split(',');
 for (var i = 0; i < genners.length; ++i) {
   (function (g) {
     if (!Knobs.prototype[g])
