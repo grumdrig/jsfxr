@@ -532,11 +532,9 @@ SoundEffect.prototype.init = function (ps) {
 
   this.sampleRate = ps.sample_rate;
   this.bitsPerChannel = ps.sample_size;
-
-  // for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
 }
 
-SoundEffect.prototype.generate = function () {
+SoundEffect.prototype.get_raw_buffer = function () {
   var fltp = 0;
   var fltdp = 0;
   var fltphp = 0;
@@ -726,24 +724,36 @@ SoundEffect.prototype.generate = function () {
       buffer.push((sample >> 8) & 0xFF);
     }
   }
-
-  // normalize buffer
-  var normalized = new Float32Array(buffer.length);
-  for (var b=0; b<buffer.length; b++) {
-    normalized[b] = 2.0 * buffer[b] / pow(2, this.bitsPerChannel) - 1.0;
+  
+  return {
+    "buffer": buffer,
+    "num_clipped": num_clipped,
   }
+}
+
+SoundEffect.prototype.generate = function() {
+  var rendered = this.get_raw_buffer();
   var wave = new RIFFWAVE();
+  var normalized = _sfxr_getNormalized(rendered.buffer, this.bitsPerChannel)
   wave.header.sampleRate = this.sampleRate;
   wave.header.bitsPerSample = this.bitsPerChannel;
-  wave.Make(buffer);
-  wave.clipping = num_clipped;
+  wave.Make(normalized);
+  wave.clipping = rendered.num_clipped;
   wave.buffer = normalized;
-  wave.getAudio = getAudioFn(wave);
+  wave.getAudio = _sfxr_getAudioFn(wave);
   return wave;
 }
 
+var _sfxr_getNormalized = function(buffer, bitsPerChannel) {
+  // normalize buffer
+  var normalized = new Float32Array(buffer.length);
+  for (var b=0; b<buffer.length; b++) {
+    normalized[b] = 2.0 * buffer[b] / pow(2, bitsPerChannel) - 1.0;
+  }
+  return normalized;
+}
 
-var getAudioFn = function(wave) {
+var _sfxr_getAudioFn = function(wave) {
   return function() {
     // check for procedural audio
     var actx = null;
