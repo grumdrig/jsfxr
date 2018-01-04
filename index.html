@@ -68,7 +68,7 @@ function play(noregen) {
       $("#clipping").text(SOUND.clipping);
     }
     
-    $("#wav").attr("href", SOUND.dataURI);
+    $("#wav").attr("href", SOUND.dataURI)  ;
     $("#sfx").attr("href", "sfx.wav?" + PARAMS.query());
     
     SOUND.getAudio().play();
@@ -281,7 +281,7 @@ function convert(control, v) {
 
 <style>
 
-button, p, #sound_vol {
+button, #soundexport, #sound_vol {
   width: 160px;
 }
 
@@ -407,16 +407,6 @@ a {
 }
 
 #uncopy {
-  margin-top: -4px;
-  border: solid 1px #0000ff;
-  border-radius: 10px;
-  width: 8px;
-  height: 8px;
-  display: inline-block;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 6px;
-  font-size: 10px;
 }
 
 #generators button {
@@ -472,9 +462,13 @@ a {
   <button onclick="gen('synth')">Synth</button> <br/>
   <button onclick="gen('random')">Random</button> <br/>
   <button onclick="gen('tone')">Tone</button> <br/>
-  <p><button onclick="play(true)">Play</button></p>
   <br/>
   <button onclick="mut()">Mutate</button> <br/>
+  <p>
+    <button onclick="play(true)">Play</button><br/>
+    <button onclick="copy()">Copy</button>
+  </p>
+  <input id="copybuffer"/>
 </div>
 
 <div class="demo">
@@ -533,16 +527,13 @@ a {
 
 <div id="export">
   <h2>Sound</h2>
-  <p><button onclick="play(true)">Play</button></p>
-  <p><button onclick="copy()">Copy</button></p>
-  <input id="copybuffer"/>
-
-  <p>
+  <p id="soundexport">
 To save the sound, right- or control-click the following link, select 
 "Save As..." and choose a name with a ".wav" extension. <br/>
   <br/>
   <a id="wav">sfx.wav</a> <br/>
   <a id="share">permalink</a> <br/>
+  <a id="permalink"></a>
   <!-- <a id="sfx">sfx.wav</a><br/> -->
 
   <table id="stats">
@@ -580,26 +571,6 @@ To save the sound, right- or control-click the following link, select
       <label for="8">8 bit</label>
   </div>
 </form>
-  
-<br/>
-<br/>
-<br/>
-
-<hr/>
-<p id="links">
-<a id="uncopy" href="UNLICENSE">¢</a> 2011
-<a href="http://fredricksen.net/">Eric Fredricksen</a>
-<br/>
-  <a href="https://github.com/grumdrig/jsfxr" id="source">(Source code)</a>
-  <p>With <a href='https://github.com/chr15m/jsfxr'>contributions</a> from Chris McCormick</p>
-<br/>
-<br/>
- (Port of 
- <a href="http://www.drpetter.se/project_sfxr.html" id="original">sfxr</a> 
-by DrPetter)
-  <p><a href='https://github.com/chr15m/jsfxr#use'>Documentation is available for using these sounds in your game code</a>.</p>
-  <p>Tip: use the <code>sfxr-to-wav</code> script to convert to wave file on the command line.</p>
-</p>
 
 </div>
 <br/>
@@ -612,6 +583,18 @@ by DrPetter)
     <button onclick="$('#serialize').hide();">Hide ✕</button>
   </div>
 </div>
-<a id="permalink"></a>
+
+<p id="links">
+(Port of  <a href="http://www.drpetter.se/project_sfxr.html" id="original">sfxr</a> by DrPetter)<br/>
+<a id="uncopy" href="UNLICENSE">¢</a> 2011
+<a href="http://fredricksen.net/">Eric Fredricksen</a><br/>
+With <a href='https://github.com/chr15m/jsfxr'>contributions</a> from Chris McCormick<br/>
+<br/>
+<a href="https://github.com/grumdrig/jsfxr" id="source">(Source code)</a>
+<br/>
+<p><a href='https://github.com/chr15m/jsfxr#use'>Documentation is available for using these sounds in your game code</a>.</p>
+<p>Tip: use the <code>sfxr-to-wav</code> script to convert to wave file on the command line.</p>
+</p>
+
 </body>
 </html>
