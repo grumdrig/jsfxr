@@ -14,16 +14,9 @@ var masterVolume = 1;
 
 var OVERSAMPLING = 8;
 
-function sqr(x) { return x * x }
-function cube(x) { return x * x * x }
-function sign(x) { return x < 0 ? -1 : 1 }
-function log(x, b) { return Math.log(x) / Math.log(b); }
-var pow = Math.pow;
-
 // Sound generation parameters are on [0,1] unless noted SIGNED & thus
 // on [-1,1]
 function Params() {
-  console.log("Params");
   this.oldParams = true;  // Note what structure this is
 
   // Wave shape
@@ -72,6 +65,12 @@ function Params() {
   this.sample_rate = 44100;
   this.sample_size = 8;
 }
+
+function sqr(x) { return x * x }
+function cube(x) { return x * x * x }
+function sign(x) { return x < 0 ? -1 : 1 }
+function log(x, b) { return Math.log(x) / Math.log(b); }
+var pow = Math.pow;
 
 // http://stackoverflow.com/questions/3096646/how-to-convert-a-floating-point-number-to-its-binary-representation-ieee-754-i
 function assembleFloat(sign, exponent, mantissa)
@@ -195,10 +194,8 @@ function rnd(max) {
   return Math.floor(Math.random() * (max + 1));
 }
 
-
 // These functions roll up random sounds appropriate to various
 // typical game events:
-
 
 Params.prototype.pickupCoin = function () {
   this.wave_type = SAWTOOTH;
@@ -251,7 +248,6 @@ Params.prototype.laserShoot = function () {
 
   return this;
 }
-
 
 Params.prototype.explosion = function () {
   this.wave_type = NOISE;
@@ -460,19 +456,11 @@ function SoundEffect(ps) {
     }
     ps = PARAMS.fromB58(ps);
   }
-  if (ps.oldParams)
-    this.initFromUI(ps);
-  else
-    this.init(ps);
+  this.init(ps);
 }
 
 
-SoundEffect.prototype.initFromUI = function (ps) {
-  //
-  // Convert user-facing parameter values to units usable by the sound
-  // generator
-  //
-
+SoundEffect.prototype.init = function (ps) {
   this.initForRepeat = function() {
     this.elapsedSinceRepeat = 0;
 
@@ -541,70 +529,6 @@ SoundEffect.prototype.initFromUI = function (ps) {
   // for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
 }
 
-
-
-SoundEffect.prototype.init = function (ps) {
-  //
-  // Convert user-facing parameter values to units usable by the sound
-  // generator
-  //
-
-  this.initForRepeat = function() {
-    this.elapsedSinceRepeat = 0;
-
-    this.period = OVERSAMPLING * 44100 / ps.frequency;
-    this.periodMax = OVERSAMPLING * 44100 / ps.frequencyMin;
-    this.enableFrequencyCutoff = (ps.frequencyMin > 0);
-    this.periodMult = Math.pow(.5, ps.frequencySlide / 44100);
-    this.periodMultSlide = ps.frequencySlideSlide * Math.pow(2, -44101/44100)
-      / 44100;
-
-    this.dutyCycle = ps.dutyCycle;
-    this.dutyCycleSlide = ps.dutyCycleSweep / (OVERSAMPLING * 44100);
-
-    this.arpeggioMultiplier = 1 / ps.arpeggioFactor;
-    this.arpeggioTime = ps.arpeggioDelay * 44100;
-  }
-  this.initForRepeat();  // First time through, this is a bit of a misnomer
-
-  // Waveform shape
-  this.waveShape = ps.shape;
-
-  // Low pass filter
-  this.fltw = ps.lowPassFrequency / (OVERSAMPLING * 44100 + ps.lowPassFrequency);
-  this.enableLowPassFilter = ps.lowPassFrequency < 44100;
-  this.fltw_d = Math.pow(ps.lowPassSweep, 1/44100);
-  this.fltdmp = (1 - ps.lowPassResonance) * 9 * (.01 + this.fltw);
-
-  // High pass filter
-  this.flthp = ps.highPassFrequency / (OVERSAMPLING * 44100 + ps.highPassFrequency);
-  this.flthp_d = Math.pow(ps.highPassSweep, 1/44100);
-
-  // Vibrato
-  this.vibratoSpeed = ps.vibratoRate * 64 / 44100 / 10;
-  this.vibratoAmplitude = ps.vibratoDepth;
-
-  // Envelope
-  this.envelopeLength = [
-    Math.floor(ps.attack * 44100),
-    Math.floor(ps.sustain * 44100),
-    Math.floor(ps.decay * 44100)
-  ];
-  this.envelopePunch = ps.punch;
-
-  // Flanger
-  this.flangerOffset = ps.flangerOffset * 44100;
-  this.flangerOffsetSlide = ps.flangerSweep;
-
-  // Repeat
-  this.repeatTime = ps.retriggerRate ? 1 / (44100 * ps.retriggerRate) : 0;
-
-  // Gain
-  this.gain = Math.sqrt(Math.pow(10, ps.gain/10));
-
-  this.sampleRate = ps.sampleRate;
-  this.bitsPerChannel = ps.sampleSize;
-}
 
 SoundEffect.prototype.generate = function () {
   var fltp = 0;
