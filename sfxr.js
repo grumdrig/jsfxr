@@ -481,6 +481,10 @@ sfxr.toWave = function(synthdef) {
   return (new SoundEffect(synthdef)).generate();
 };
 
+sfxr.toAudio = function(synthdef) {
+  return (new SoundEffect(synthdef)).generate().getAudio();
+}
+
 /*** Main entry point ***/
 
 function SoundEffect(ps) {
