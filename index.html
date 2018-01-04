@@ -74,6 +74,15 @@ function play(noregen) {
     SOUND.getAudio().play();
 }
 
+function copy() {
+  var b = $("#copybuffer");
+  b.css("display", "block");
+  b.val($("#permalink").text());
+  b.select();
+  document.execCommand("copy");
+  b.css("display", "none");
+}
+
 function serialize_params() {
   $("textarea").val(JSON.stringify(PARAMS, null, 2));
   $("#serialize").show();
@@ -426,6 +435,12 @@ a {
   min-width: 250px;
 }
 
+#copybuffer {
+  display: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 #serialize {
   display: none;
 }
@@ -519,7 +534,9 @@ a {
 
 <div id="export">
   <h2>Sound</h2>
-  <button onclick="play(true)">Play</button> <br/>
+  <p><button onclick="play(true)">Play</button></p>
+  <p><button onclick="copy()">Copy</button></p>
+  <input id="copybuffer"/>
 
   <p>
 To save the sound, right- or control-click the following link, select 
@@ -592,7 +609,7 @@ by DrPetter)
   <button onclick="deserialize_params()"> ▲ Deserialize</button>
   <div id="serialize">
     <textarea></textarea>
-    <button onclick="$('textarea').select();">Select</button>
+    <button onclick="$('textarea').select(); document.execCommand('copy');">Copy</button>
     <button onclick="$('#serialize').hide();">Hide ✕</button>
   </div>
 </div>
