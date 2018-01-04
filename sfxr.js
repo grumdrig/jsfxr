@@ -454,6 +454,33 @@ Params.prototype.tone = function () {
   return this;
 }
 
+/*** Simpler namespaced functional API ***/
+
+sfxr = {};
+
+sfxr.toBuffer = function(synthdef) {
+  return (new SoundEffect(synthdef)).getRawBuffer()["buffer"];
+};
+
+sfxr.toWebAudio = function(synthdef, audiocontext) {
+  var sfx = new SoundEffect(synthdef);
+  var buffer = _sfxr_getNormalized(sfx.getRawBuffer()["buffer"], sfx.bitsPerChannel);
+  if (audiocontext) {
+    var buff = audiocontext.createBuffer(1, buffer.length, sfx.sampleRate);
+    var nowBuffering = buff.getChannelData(0);
+    for (var i = 0; i < buffer.length; i++) {
+      nowBuffering[i] = buffer[i];
+    }
+    var proc = audiocontext.createBufferSource();
+    proc.buffer = buff;
+    return proc;
+  }
+};
+
+sfxr.toWave = function(synthdef) {
+  return (new SoundEffect(synthdef)).generate();
+};
+
 /*** Main entry point ***/
 
 function SoundEffect(ps) {
