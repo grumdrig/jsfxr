@@ -1,8 +1,3 @@
-// dependency imported later
-if (typeof(window) == "undefined" || !window["RIFFWAVE"]) {
-  var RIFFWAVE = null;
-}
-
 // Wave shapes
 var SQUARE = 0;
 var SAWTOOTH = 1;
@@ -13,6 +8,8 @@ var NOISE = 3;
 var masterVolume = 1;
 
 var OVERSAMPLING = 8;
+
+/*** Core data structure ***/
 
 // Sound generation parameters are on [0,1] unless noted SIGNED & thus
 // on [-1,1]
@@ -66,11 +63,27 @@ function Params() {
   this.sample_size = 8;
 }
 
+/*** Helper functions ***/
+
 function sqr(x) { return x * x }
 function cube(x) { return x * x * x }
 function sign(x) { return x < 0 ? -1 : 1 }
 function log(x, b) { return Math.log(x) / Math.log(b); }
 var pow = Math.pow;
+
+function frnd(range) {
+  return Math.random() * range;
+}
+
+function rndr(from, to) {
+  return Math.random() * (to - from) + from;
+}
+
+function rnd(max) {
+  return Math.floor(Math.random() * (max + 1));
+}
+
+/*** Import/export functions ***/
 
 // http://stackoverflow.com/questions/3096646/how-to-convert-a-floating-point-number-to-its-binary-representation-ieee-754-i
 function assembleFloat(sign, exponent, mantissa)
@@ -117,29 +130,32 @@ function numberToFloat(bytes) {
 // export parameter list to URL friendly base58 string
 // https://gist.github.com/diafygi/90a3e80ca1c2793220e5/
 var b58alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-var params_order = ["wave_type",
-"p_env_attack",
-"p_env_sustain",
-"p_env_punch",
-"p_env_decay",
-"p_base_freq",
-"p_freq_limit",
-"p_freq_ramp",
-"p_freq_dramp",
-"p_vib_strength",
-"p_vib_speed",
-"p_arp_mod",
-"p_arp_speed",
-"p_duty",
-"p_duty_ramp",
-"p_repeat_speed",
-"p_pha_offset",
-"p_pha_ramp",
-"p_lpf_freq",
-"p_lpf_ramp",
-"p_lpf_resonance",
-"p_hpf_freq",
-"p_hpf_ramp"];
+var params_order = [
+  "wave_type",
+  "p_env_attack",
+  "p_env_sustain",
+  "p_env_punch",
+  "p_env_decay",
+  "p_base_freq",
+  "p_freq_limit",
+  "p_freq_ramp",
+  "p_freq_dramp",
+  "p_vib_strength",
+  "p_vib_speed",
+  "p_arp_mod",
+  "p_arp_speed",
+  "p_duty",
+  "p_duty_ramp",
+  "p_repeat_speed",
+  "p_pha_offset",
+  "p_pha_ramp",
+  "p_lpf_freq",
+  "p_lpf_ramp",
+  "p_lpf_resonance",
+  "p_hpf_freq",
+  "p_hpf_ramp"
+];
+
 Params.prototype.toB58 = function() {
   var convert = [];
   for (var pi in params_order) {
@@ -182,17 +198,7 @@ Params.prototype.fromJSON = function(struct) {
   return this;
 }
 
-function frnd(range) {
-  return Math.random() * range;
-}
-
-function rndr(from, to) {
-  return Math.random() * (to - from) + from;
-}
-
-function rnd(max) {
-  return Math.floor(Math.random() * (max + 1));
-}
+/*** Presets ***/
 
 // These functions roll up random sounds appropriate to various
 // typical game events:
@@ -448,6 +454,8 @@ Params.prototype.tone = function () {
   return this;
 }
 
+/*** Main entry point ***/
+
 function SoundEffect(ps) {
   if (typeof(ps) == "string") {
     var PARAMS = new Params();
@@ -458,7 +466,6 @@ function SoundEffect(ps) {
   }
   this.init(ps);
 }
-
 
 SoundEffect.prototype.init = function (ps) {
   this.initForRepeat = function() {
@@ -528,7 +535,6 @@ SoundEffect.prototype.init = function (ps) {
 
   // for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
 }
-
 
 SoundEffect.prototype.generate = function () {
   var fltp = 0;
@@ -772,10 +778,10 @@ var getAudioFn = function(wave) {
       audio.src = wave.dataURI;
       return audio;
     }
-  }
-}
+  };
+};
 
-var genners = 'pickupCoin,laserShoot,explosion,powerUp,hitHurt,jump,blipSelect,synth,random,tone'.split(',');
+/*** Plumbing ***/
 
 (function (root, factory) {
   if(typeof define === "function" && define.amd) {
