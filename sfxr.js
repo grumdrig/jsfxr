@@ -468,27 +468,7 @@ function SoundEffect(ps) {
 }
 
 SoundEffect.prototype.init = function (ps) {
-  this.initForRepeat = function() {
-    this.elapsedSinceRepeat = 0;
-
-    this.period = 100 / (ps.p_base_freq * ps.p_base_freq + 0.001);
-    this.periodMax = 100 / (ps.p_freq_limit * ps.p_freq_limit + 0.001);
-    this.enableFrequencyCutoff = (ps.p_freq_limit > 0);
-    this.periodMult = 1 - Math.pow(ps.p_freq_ramp, 3) * 0.01;
-    this.periodMultSlide = -Math.pow(ps.p_freq_dramp, 3) * 0.000001;
-
-    this.dutyCycle = 0.5 - ps.p_duty * 0.5;
-    this.dutyCycleSlide = -ps.p_duty_ramp * 0.00005;
-
-    if (ps.p_arp_mod >= 0)
-      this.arpeggioMultiplier = 1 - Math.pow(ps.p_arp_mod, 2) * .9;
-    else
-      this.arpeggioMultiplier = 1 + Math.pow(ps.p_arp_mod, 2) * 10;
-    this.arpeggioTime = Math.floor(Math.pow(1 - ps.p_arp_speed, 2) * 20000 + 32);
-    if (ps.p_arp_speed === 1)
-      this.arpeggioTime = 0;
-  }
-
+  this.parameters = ps;
   this.initForRepeat();  // First time through, this is a bit of a misnomer
 
   // Waveform shape
@@ -534,7 +514,29 @@ SoundEffect.prototype.init = function (ps) {
   this.bitsPerChannel = ps.sample_size;
 }
 
-SoundEffect.prototype.get_raw_buffer = function () {
+SoundEffect.prototype.initForRepeat = function() {
+  var ps = this.parameters;
+  this.elapsedSinceRepeat = 0;
+
+  this.period = 100 / (ps.p_base_freq * ps.p_base_freq + 0.001);
+  this.periodMax = 100 / (ps.p_freq_limit * ps.p_freq_limit + 0.001);
+  this.enableFrequencyCutoff = (ps.p_freq_limit > 0);
+  this.periodMult = 1 - Math.pow(ps.p_freq_ramp, 3) * 0.01;
+  this.periodMultSlide = -Math.pow(ps.p_freq_dramp, 3) * 0.000001;
+
+  this.dutyCycle = 0.5 - ps.p_duty * 0.5;
+  this.dutyCycleSlide = -ps.p_duty_ramp * 0.00005;
+
+  if (ps.p_arp_mod >= 0)
+    this.arpeggioMultiplier = 1 - Math.pow(ps.p_arp_mod, 2) * .9;
+  else
+    this.arpeggioMultiplier = 1 + Math.pow(ps.p_arp_mod, 2) * 10;
+  this.arpeggioTime = Math.floor(Math.pow(1 - ps.p_arp_speed, 2) * 20000 + 32);
+  if (ps.p_arp_speed === 1)
+    this.arpeggioTime = 0;
+}
+
+SoundEffect.prototype.getRawBuffer = function () {
   var fltp = 0;
   var fltdp = 0;
   var fltphp = 0;
@@ -727,18 +729,18 @@ SoundEffect.prototype.get_raw_buffer = function () {
   
   return {
     "buffer": buffer,
-    "num_clipped": num_clipped,
+    "clipped": num_clipped,
   }
 }
 
 SoundEffect.prototype.generate = function() {
-  var rendered = this.get_raw_buffer();
+  var rendered = this.getRawBuffer();
   var wave = new RIFFWAVE();
-  var normalized = _sfxr_getNormalized(rendered.buffer, this.bitsPerChannel)
+  var normalized = _sfxr_getNormalized(rendered.buffer, this.bitsPerChannel);
   wave.header.sampleRate = this.sampleRate;
   wave.header.bitsPerSample = this.bitsPerChannel;
   wave.Make(normalized);
-  wave.clipping = rendered.num_clipped;
+  wave.clipping = rendered.clipped;
   wave.buffer = normalized;
   wave.getAudio = _sfxr_getAudioFn(wave);
   return wave;
