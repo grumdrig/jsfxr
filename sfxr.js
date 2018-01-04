@@ -845,9 +845,12 @@ var _sfxr_getAudioFn = function(wave) {
   return {
     "Params": Params,
     "SoundEffect": SoundEffect,
-    "SQUARE": SQUARE,
-    "SAWTOOTH": SAWTOOTH,
-    "SINE": SINE,
-    "NOISE": NOISE
+    "sfxr": sfxr,
+    "waveforms": {
+      "SQUARE": SQUARE,
+      "SAWTOOTH": SAWTOOTH,
+      "SINE": SINE,
+      "NOISE": NOISE
+    }
   };
 }));
