@@ -175,17 +175,7 @@ Params.prototype.toB58 = function() {
 }
 
 Params.prototype.fromB58 = function(b58encoded) {
-  var decoded = function(S,A){var d=[],b=[],i,j,c,n;for(i in S){j=0,c=A.indexOf(S[i]);if(c<0)return undefined;c||b.length^i?i:b.push(0);while(j in d||c){n=d[j];n=n?n*58+c:c;c=n>>8;d[j]=n%256;j++}}while(j--)b.push(d[j]);return new Uint8Array(b)}(b58encoded,b58alphabet);
-  for (var pi in params_order) {
-    var p = params_order[pi];
-    var offset = (pi - 1) * 4 + 1;
-    if (p == "wave_type") {
-      this[p] = decoded[0];
-    } else {
-      var val = (decoded[offset] | (decoded[offset + 1] << 8) | (decoded[offset + 2] << 16) | (decoded[offset + 3] << 24));
-      this[p] = numberToFloat(val);
-    }
-  }
+  this.fromJSON(sfxr.b58decode(b58encoded));
   return this;
 }
 
@@ -483,6 +473,22 @@ sfxr.toWave = function(synthdef) {
 
 sfxr.toAudio = function(synthdef) {
   return (new SoundEffect(synthdef)).generate().getAudio();
+}
+
+sfxr.b58decode = function(b58encoded) {
+  var decoded = function(S,A){var d=[],b=[],i,j,c,n;for(i in S){j=0,c=A.indexOf(S[i]);if(c<0)return undefined;c||b.length^i?i:b.push(0);while(j in d||c){n=d[j];n=n?n*58+c:c;c=n>>8;d[j]=n%256;j++}}while(j--)b.push(d[j]);return new Uint8Array(b)}(b58encoded,b58alphabet);
+  var result = {};
+  for (var pi in params_order) {
+    var p = params_order[pi];
+    var offset = (pi - 1) * 4 + 1;
+    if (p == "wave_type") {
+      result[p] = decoded[0];
+    } else {
+      var val = (decoded[offset] | (decoded[offset + 1] << 8) | (decoded[offset + 2] << 16) | (decoded[offset + 3] << 24));
+      result[p] = numberToFloat(val);
+    }
+  }
+  return result;
 }
 
 /*** Main entry point ***/
