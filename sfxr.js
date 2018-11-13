@@ -792,15 +792,19 @@ var _sfxr_getNormalized = function(buffer, bitsPerChannel) {
   return normalized;
 }
 
+var _actx = null;
 var _sfxr_getAudioFn = function(wave) {
   return function() {
     // check for procedural audio
     var actx = null;
-    if ('AudioContext' in window) {
-      actx = new AudioContext();
-    } else if ('webkitAudioContext' in window) {
-      actx = new webkitAudioContext();
+    if (!_actx) {
+      if ('AudioContext' in window) {
+        _actx = new AudioContext();
+      } else if ('webkitAudioContext' in window) {
+        _actx = new webkitAudioContext();
+      }
     }
+    actx = _actx;
     
     if (actx) {
       var buff = actx.createBuffer(1, wave.buffer.length, wave.header.sampleRate);
