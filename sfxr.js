@@ -818,9 +818,9 @@ var _sfxr_getAudioFn = function(wave) {
           var proc = actx.createBufferSource();
           proc.buffer = buff;
           proc.connect(actx.destination);
-          if ('AudioContext' in window) {
+          if (proc["start"]) {
             proc.start();
-          } else if ('webkitAudioContext' in window) {
+          } else if (proc["noteOn"]) {
             proc.noteOn(0);
           }
           this.channels.push(proc);
