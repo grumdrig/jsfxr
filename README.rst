@@ -12,6 +12,11 @@ use
 
 You can use the sounds you make with sfxr in your game code.
 
+Include the scripts in your page:
+
+        <script src="https://sfxr.me/riffwave.js"></script>
+	<script src="https://sfxr.me/sfxr.js"></script>
+
 Once you find a nice sound, click the Serialize button and copy the JSON code for the sound::
 
         var sound = {
