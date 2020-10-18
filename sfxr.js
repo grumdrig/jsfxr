@@ -812,12 +812,17 @@ var _sfxr_getAudioFn = function(wave) {
       for (var i=0;i<wave.buffer.length;i++) {
         nowBuffering[i] = wave.buffer[i];
       }
-      return {
+      var volume = 1.0;
+      var obj = {
         "channels": [],
+        "setVolume": function(v) { volume = v; return obj; },
         "play": function() {
           var proc = actx.createBufferSource();
           proc.buffer = buff;
-          proc.connect(actx.destination);
+          var gainNode = actx.createGain()
+          gainNode.gain.value = volume;
+          gainNode.connect(actx.destination)
+          proc.connect(gainNode);
           if (proc["start"]) {
             proc.start();
           } else if (proc["noteOn"]) {
@@ -826,6 +831,7 @@ var _sfxr_getAudioFn = function(wave) {
           this.channels.push(proc);
         }
       };
+      return obj;
     } else {
       var audio = new Audio();
       audio.src = wave.dataURI;
