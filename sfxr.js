@@ -776,7 +776,7 @@ SoundEffect.prototype.generate = function() {
   var normalized = _sfxr_getNormalized(rendered.buffer, this.bitsPerChannel);
   wave.header.sampleRate = this.sampleRate;
   wave.header.bitsPerSample = this.bitsPerChannel;
-  wave.Make(normalized);
+  wave.Make(rendered.buffer);
   wave.clipping = rendered.clipped;
   wave.buffer = normalized;
   wave.getAudio = _sfxr_getAudioFn(wave);
