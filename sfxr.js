@@ -432,6 +432,7 @@ Params.prototype.synth = function () {
   this.p_lpf_resonance = frnd(1);
   this.p_hpf_freq = rnd(3) == 3 ? frnd(1) : 0;
   this.p_hpf_ramp = rnd(3) == 3 ? frnd(1) : 0;
+  return this;
 }
 
 Params.prototype.tone = function () {
