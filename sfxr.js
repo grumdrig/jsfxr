@@ -379,6 +379,25 @@ Params.prototype.tone = function () {
   return this;
 }
 
+Params.prototype.click = function() {
+  const base = ["explosion", "hitHurt"][rnd(1)];
+  console.log("base", base);
+  this[base]();
+  if (rnd(1)) {
+    this.p_freq_ramp = -0.5 + frnd(1.0);
+  }
+  if (rnd(1)) {
+    this.p_env_sustain = (frnd(0.4) + 0.2) * this.p_env_sustain;
+    this.p_env_decay = (frnd(0.4) + 0.2) * this.p_env_decay;
+  }
+  if (rnd(3) == 0) {
+    this.p_env_attack = frnd(0.3);
+  }
+  this.p_base_freq = 1 - frnd(0.25);
+  this.p_hpf_freq = 1 - frnd(0.1);
+  return this;
+}
+
 Params.prototype.random = function () {
   this.wave_type = rnd(3);
   if (rnd(1))
