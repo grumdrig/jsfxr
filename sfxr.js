@@ -381,7 +381,6 @@ Params.prototype.tone = function () {
 
 Params.prototype.click = function() {
   const base = ["explosion", "hitHurt"][rnd(1)];
-  console.log("base", base);
   this[base]();
   if (rnd(1)) {
     this.p_freq_ramp = -0.5 + frnd(1.0);
