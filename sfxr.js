@@ -848,6 +848,7 @@ var _sfxr_getAudioFn = function(wave) {
             proc.noteOn(0);
           }
           this.channels.push(proc);
+          return proc;
         }
       };
       return obj;
