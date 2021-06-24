@@ -352,7 +352,7 @@ Params.prototype.blipSelect = function () {
 
 Params.prototype.synth = function () {
   this.wave_type = rnd(1);
-  this.p_base_freq = rnd(1) ? 0.2477 : 0.1737;
+  this.p_base_freq = rnd(1) ? 0.2723171360931539 : 0.19255692561524382;
   this.p_env_attack = rnd(4) > 3 ? frnd(0.5) : 0;
   this.p_env_sustain = frnd(1);
   this.p_env_punch = frnd(1);
