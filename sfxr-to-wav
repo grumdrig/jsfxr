@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+sfxr = require('./sfxr.js');
+var fs = require('fs');
+
+// defaults
+var outfile = "sfxr-sound.wav";
+
+// set up initial sound parameters object
+var parameters = new sfxr.Params();
+parameters.sound_vol = 0.25;
+parameters.sample_rate = 44100;
+parameters.sample_size = 8;
+
+// parse arguments
+for (a=2; a<process.argv.length; a++) {
+  if (process.argv[a] == "-h" || process.argv[a] == "--help") {
+    console.log("Usage: ./sfxr-to-wav SYNTH-DEFINITION [FILENAME.wav]");
+    console.log("SYNTH-DEFINITION is the encoded synth as found in the share URL at sfxr.me");
+    console.log("You can also pipe the JSON Serialized version of the synth into the script like `cat my-sound.sfxr.json | ./sfxr-to-wav my-sound.wav`");
+    process.exit();
+  } else if (process.argv[a].indexOf(".wav") != -1) {
+    outfile = process.argv[a];
+  } else {
+    // grab the b58 synth definition from the command line
+    parameters.fromB58(process.argv[a]);
+    parameters.set = true;
+    if (outfile == "sfxr-sound.wav") {
+      outfile = process.argv[a] + ".wav";
+    }
+  }
+}
+
+if (!parameters.set) {
+  // we're getting json from stdin
+  parameters.fromJSON(
+    JSON.parse(
+      fs.readFileSync('/dev/stdin').toString()));
+}
+
+// get jsfxr to generate the sound
+var sound = new sfxr.SoundEffect(parameters).generate();
+
+// write the wav out to a file
+var regex = /^data:.+\/(.+);base64,(.*)$/;
+var matches = sound.dataURI.match(regex);
+var ext = matches[1];
+var data = matches[2];
+var buffer = new Buffer(data, 'base64');
+fs.writeFileSync(outfile, buffer);

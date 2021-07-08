@@ -1,133 +1,15 @@
-
 // Wave shapes
 var SQUARE = 0;
 var SAWTOOTH = 1;
 var SINE = 2;
 var NOISE = 3;
 
-
 // Playback volume
 var masterVolume = 1;
 
-
 var OVERSAMPLING = 8;
 
-
-var defaultKnobs = {
-  shape: SQUARE, // SQUARE/SAWTOOTH/SINE/NOISE
-
-  attack:  0,   // sec
-  sustain: 0.2, // sec
-  punch:   0,   // proportion
-  decay:   0.2, // sec
-
-  frequency:        1000, // Hz
-  frequencyMin:        0, // Hz
-  frequencySlide:      0, // 8va/sec
-  frequencySlideSlide: 0, // 8va/sec/sec
-
-  vibratoDepth:  0, // proportion
-  vibratoRate:  10, // Hz
-
-  arpeggioFactor: 1,   // multiple of frequency
-  arpeggioDelay:  0.1, // sec  
-  
-  dutyCycle:      0.5, // proportion of wavelength
-  dutyCycleSweep: 0,   // proportion/second
-
-  retriggerRate: 0, // Hz
-
-  flangerOffset: 0, // sec
-  flangerSweep:  0, // offset/sec
-
-  lowPassFrequency: 44100, // Hz
-  lowPassSweep:     1,     // ^sec
-  lowPassResonance: 0.5,   // proportion
-
-  highPassFrequency: 0, // Hz
-  highPassSweep:     0, // ^sec
-  
-  gain: -10, // dB
-
-  sampleRate: 44100, // Hz
-  sampleSize: 8,     // bits per channel
-};
-
-
-function Knobs(settings) {
-  settings = settings||{};
-  for (var i in defaultKnobs) {
-    if (settings.hasOwnProperty(i))
-      this[i] = settings[i];
-    else
-      this[i] = defaultKnobs[i];
-  }
-}
-
-
-function sqr(x) { return x * x }
-function cube(x) { return x * x * x }
-function sign(x) { return x < 0 ? -1 : 1 }
-function log(x, b) { return Math.log(x) / Math.log(b); }
-var pow = Math.pow;
-
-
-// Translate from UI-friendly settings to human-friendly ones
-Knobs.prototype.translate = function (ps) {
-  this.shape = ps.wave_type;
-
-  this.attack = sqr(ps.p_env_attack) * 100000 / 44100;
-  this.sustain = sqr(ps.p_env_sustain) * 100000 / 44100;
-  this.punch = ps.p_env_punch;
-  this.decay = sqr(ps.p_env_decay) * 100000 / 44100;
-
-  this.frequency = OVERSAMPLING * 441 * (sqr(ps.p_base_freq) + 0.001);
-  if (ps.p_freq_limit > 0)
-    this.frequencyMin = OVERSAMPLING * 441 * (sqr(ps.p_freq_limit) + 0.001);
-  else
-    this.frequencyMin = 0;
-  this.enableFrequencyCutoff = (ps.p_freq_limit > 0);
-  this.frequencySlide = 44100 * log(1 - cube(ps.p_freq_ramp) / 100, 0.5);
-  this.frequencySlideSlide = -cube(ps.p_freq_dramp) / 1000000 * 
-    44100 * pow(2, 44101/44100);
-
-  this.vibratoRate = 44100 * 10 / 64 * sqr(ps.p_vib_speed) / 100;
-  this.vibratoDepth = ps.p_vib_strength / 2;
-
-  this.arpeggioFactor = 1 / ((ps.p_arp_mod >= 0) ? 
-                             1 - sqr(ps.p_arp_mod) * 0.9 : 
-                             1 + sqr(ps.p_arp_mod) * 10);
-  this.arpeggioDelay = ((ps.p_arp_speed === 1) ? 0 :
-                Math.floor(sqr(1 - ps.p_arp_speed) * 20000 + 32) / 44100);
-
-  this.dutyCycle = (1 - ps.p_duty) / 2;
-  this.dutyCycleSweep = OVERSAMPLING * 44100 * -ps.p_duty_ramp / 20000;
-
-  this.retriggerRate = 44100 / ((ps.p_repeat_speed === 0) ? 0 :
-                       Math.floor(sqr(1 - ps.p_repeat_speed) * 20000) + 32);
-
-  this.flangerOffset = sign(ps.p_pha_offset) * 
-    sqr(ps.p_pha_offset) * 1020 / 44100;
-  this.flangerSweep = sign(ps.p_pha_ramp) * sqr(ps.p_pha_ramp);
-
-  this.enableLowPassFilter = (ps.p_lpf_freq != 1);
-  function flurp(x) { return x / (1-x) }
-  this.lowPassFrequency = ps.p_lpf_freq === 1 ? 44100 :
-    Math.round(OVERSAMPLING * 44100 * flurp(cube(ps.p_lpf_freq) / 10));
-  this.lowPassSweep = pow(1 + ps.p_lpf_ramp / 10000, 44100);
-  this.lowPassResonance = 1 - (5 / (1 + sqr(ps.p_lpf_resonance) * 20)) / 9;
-
-  this.highPassFrequency = Math.round(OVERSAMPLING * 44100 * 
-                                      flurp(sqr(ps.p_hpf_freq) / 10));
-  this.highPassSweep = pow(1 + ps.p_hpf_ramp * 0.0003, 44100);
-
-  this.gain = 10 * log(sqr(Math.exp(ps.sound_vol) - 1), 10);
-
-  this.sampleRate = ps.sample_rate;
-  this.sampleSize = ps.sample_size;
-
-  return this;
-}
+/*** Core data structure ***/
 
 // Sound generation parameters are on [0,1] unless noted SIGNED & thus
 // on [-1,1]
@@ -181,6 +63,13 @@ function Params() {
   this.sample_size = 8;
 }
 
+/*** Helper functions ***/
+
+function sqr(x) { return x * x }
+function cube(x) { return x * x * x }
+function sign(x) { return x < 0 ? -1 : 1 }
+function log(x, b) { return Math.log(x) / Math.log(b); }
+var pow = Math.pow;
 
 function frnd(range) {
   return Math.random() * range;
@@ -194,12 +83,118 @@ function rnd(max) {
   return Math.floor(Math.random() * (max + 1));
 }
 
+/*** Import/export functions ***/
+
+// http://stackoverflow.com/questions/3096646/how-to-convert-a-floating-point-number-to-its-binary-representation-ieee-754-i
+function assembleFloat(sign, exponent, mantissa)
+{
+    return (sign << 31) | (exponent << 23) | (mantissa);
+}
+
+function floatToNumber(flt)
+{
+    if (isNaN(flt)) // Special case: NaN
+        return assembleFloat(0, 0xFF, 0x1337); // Mantissa is nonzero for NaN
+
+    var sign = (flt < 0) ? 1 : 0;
+    flt = Math.abs(flt);
+    if (flt == 0.0) // Special case: +-0
+        return assembleFloat(sign, 0, 0);
+
+    var exponent = Math.floor(Math.log(flt) / Math.LN2);
+    if (exponent > 127 || exponent < -126) // Special case: +-Infinity (and huge numbers)
+        return assembleFloat(sign, 0xFF, 0); // Mantissa is zero for +-Infinity
+
+    var mantissa = flt / Math.pow(2, exponent);
+    return assembleFloat(sign, exponent + 127, (mantissa * Math.pow(2, 23)) & 0x7FFFFF);
+}
+
+// http://stackoverflow.com/a/16001019
+function numberToFloat(bytes) {
+    var sign = (bytes & 0x80000000) ? -1 : 1;
+    var exponent = ((bytes >> 23) & 0xFF) - 127;
+    var significand = (bytes & ~(-1 << 23));
+
+    if (exponent == 128) 
+        return sign * ((significand) ? Number.NaN : Number.POSITIVE_INFINITY);
+
+    if (exponent == -127) {
+        if (significand == 0) return sign * 0.0;
+        exponent = -126;
+        significand /= (1 << 22);
+    } else significand = (significand | (1 << 23)) / (1 << 23);
+
+    return sign * significand * Math.pow(2, exponent);
+}
+
+// export parameter list to URL friendly base58 string
+// https://gist.github.com/diafygi/90a3e80ca1c2793220e5/
+var b58alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+var params_order = [
+  "wave_type",
+  "p_env_attack",
+  "p_env_sustain",
+  "p_env_punch",
+  "p_env_decay",
+  "p_base_freq",
+  "p_freq_limit",
+  "p_freq_ramp",
+  "p_freq_dramp",
+  "p_vib_strength",
+  "p_vib_speed",
+  "p_arp_mod",
+  "p_arp_speed",
+  "p_duty",
+  "p_duty_ramp",
+  "p_repeat_speed",
+  "p_pha_offset",
+  "p_pha_ramp",
+  "p_lpf_freq",
+  "p_lpf_ramp",
+  "p_lpf_resonance",
+  "p_hpf_freq",
+  "p_hpf_ramp"
+];
+
+Params.prototype.toB58 = function() {
+  var convert = [];
+  for (var pi in params_order) {
+    var p = params_order[pi];
+    if (p == "wave_type") {
+      convert.push(this[p]);
+    } else if (p.indexOf("p_") == 0) {
+      var val = this[p];
+      val = floatToNumber(val);
+      convert.push(0xff & val);
+      convert.push(0xff & (val >> 8))
+      convert.push(0xff & (val >> 16))
+      convert.push(0xff & (val >> 24))
+    }
+  }
+  return function(B,A){var d=[],s="",i,j,c,n;for(i in B){j=0,c=B[i];s+=c||s.length^i?"":1;while(j in d||c){n=d[j];n=n?n*256+c:c;c=n/58|0;d[j]=n%58;j++}}while(j--)s+=A[d[j]];return s}(convert, b58alphabet);
+}
+
+Params.prototype.fromB58 = function(b58encoded) {
+  this.fromJSON(sfxr.b58decode(b58encoded));
+  return this;
+}
+
+Params.prototype.fromJSON = function(struct) {
+  for (var p in struct) {
+    if (struct.hasOwnProperty(p)) {
+      this[p] = struct[p];
+    }
+  }
+  return this;
+}
+
+/*** Presets ***/
 
 // These functions roll up random sounds appropriate to various
 // typical game events:
 
-
 Params.prototype.pickupCoin = function () {
+  this.wave_type = SAWTOOTH;
   this.p_base_freq = 0.4 + frnd(0.5);
   this.p_env_attack = 0;
   this.p_env_sustain = frnd(0.1);
@@ -211,21 +206,6 @@ Params.prototype.pickupCoin = function () {
   }
   return this;
 }
-
-
-Knobs.prototype.pickupCoin = function () {
-  this.frequency = rndr(568, 2861);
-  this.attack = 0;
-  this.sustain = frnd(0.227);
-  this.decay = rndr(0.227, 0.567);
-  this.punch = rndr(0.3, 0.6);
-  if (rnd(1)) {
-    this.arpeggioFactor = rndr(1.037, 1.479);
-    this.arpeggioDelay = rndr(0.042, 0.114);
-  }
-  return this;
-}
-
 
 Params.prototype.laserShoot = function () {
   this.wave_type = rnd(2);
@@ -265,45 +245,6 @@ Params.prototype.laserShoot = function () {
   return this;
 }
 
-
-Knobs.prototype.laserShoot = function () {
-  this.shape = rnd(2);
-  if(this.shape === SINE && rnd(1))
-    this.shape = rnd(1);
-  if (rnd(2) === 0) {
-    this.frequency = rndr(321, 2861);
-    this.frequencyMin = frnd(38.8);
-    this.frequencySlide = rndr(-27.3, -174.5);
-  } else {
-    this.frequency = rndr(321, 3532);
-    this.frequencyMin = rndr(144, 2/3 * this.frequency);
-    this.frequencySlide = rndr(-2.15, -27.27);
-  }
-  if (this.shape === SAWTOOTH)
-    this.dutyCycle = 0;
-  if (rnd(1)) {
-    this.dutyCycle = rndr(1/4, 1/2);
-    this.dutyCycleSweep = rndr(0, -3.528);
-  } else {
-    this.dutyCycle = rndr(0.05, 0.3);
-    this.dutyCycleSweep = frnd(12.35);
-  }
-  this.attack = 0;
-  this.sustain = rndr(0.02, 0.2);
-  this.decay = frnd(0.36);
-  if (rnd(1))
-    this.punch = frnd(0.3);
-  if (rnd(2) === 0) {
-    this.flangerOffset = frnd(0.001);
-    this.flangerSweep = -frnd(0.04);
-  }
-  if (rnd(1))
-    this.highPassFrequency = frnd(3204);
-
-  return this;
-}
-
-
 Params.prototype.explosion = function () {
   this.wave_type = NOISE;
   if (rnd(1)) {
@@ -337,40 +278,6 @@ Params.prototype.explosion = function () {
   return this;
 }
 
-
-Knobs.prototype.explosion = function () {
-  this.shape = NOISE;
-  if (rnd(1)) {
-    this.frequency = rndr(4, 224);
-    this.frequencySlide = rndr(-0.623, 17.2);
-  } else {
-    this.frequency = rndr(9, 2318);
-    this.frequencySlide = rndr(-5.1, -40.7);
-  }
-  if (rnd(4) === 0)
-    this.frequencySlide = 0;
-  if (rnd(2) === 0)
-    this.retriggerRate = rndr(4.5, 53);
-  this.attack = 0;
-  this.sustain = rndr(0.0227, 0.363);
-  this.decay = frnd(0.567);
-  if (rnd(1)) {
-    this.flangerOffset = rndr(-0.0021, 0.0083);
-    this.flangerSweep = -frnd(0.09);
-  }
-  this.punch = 0.2 + frnd(0.6);
-  if (rnd(1)) {
-    this.vibratoDepth = frnd(0.35);
-    this.vibratoRate = frnd(24.8);
-  }
-  if (rnd(2) === 0) {
-    this.arpeggioFactor = rndr(0.135, 2.358);
-    this.arpeggioDelay = rndr(0.00526, 0.0733);
-  }
-  return this;
-}
-
-
 Params.prototype.powerUp = function () {
   if (rnd(1)) {
     this.wave_type = SAWTOOTH;
@@ -396,33 +303,6 @@ Params.prototype.powerUp = function () {
   return this;
 }
 
-
-Knobs.prototype.powerUp = function () {
-  if (rnd(1)) {
-    this.shape = SAWTOOTH;
-    this.dutyCycle = 0;
-  } else {
-    this.dutyCycle = rndr(0.2, 0.5);
-  }
-  this.frequency = rndr(145, 886);
-  if (rnd(1)) {
-    this.frequencySlide = rndr(0.636, 79.6);
-    this.retriggerRate = rndr(6, 53);
-  } else {
-    this.frequencySlide = rndr(0.0795, 9.94);
-    if (rnd(1)) {
-      this.vibratoDepth = frnd(0.35);
-      this.vibratoRate = frnd(24.8);
-    }
-  }
-  this.attack = 0;
-  this.sustain = frnd(0.363);
-  this.decay = rndr(0.023, 0.57);
-
-  return this;
-}
-
-
 Params.prototype.hitHurt = function () {
   this.wave_type = rnd(2);
   if (this.wave_type === SINE)
@@ -441,26 +321,6 @@ Params.prototype.hitHurt = function () {
   return this;
 }
 
-
-Knobs.prototype.hitHurt = function () {
-  this.shape = rnd(2);
-  if (this.shape === SINE)
-    this.shape = NOISE;
-  if (this.shape === SQUARE)
-    this.dutyCycle = rndr(0.2, 0.5);
-  if (this.shape === SAWTOOTH)
-    this.dutyCycle = 0;
-  this.frequency = rndr(145, 2261);
-  this.frequencySlide = rndr(-17.2, -217.9);
-  this.attack = 0;
-  this.sustain = frnd(0.023);
-  this.decay = rndr(0.023, 0.2);
-  if (rnd(1))
-    this.highPassFrequency = frnd(3204);
-  return this;
-}
-
-
 Params.prototype.jump = function () {
   this.wave_type = SQUARE;
   this.p_duty = frnd(0.6);
@@ -476,23 +336,6 @@ Params.prototype.jump = function () {
   return this;
 }
 
-
-Knobs.prototype.jump = function () {
-  this.shape = SQUARE;
-  this.dutyCycle = rndr(0.2, 0.5);
-  this.frequency = rndr(321, 1274);
-  this.frequencySlide = rndr(0.64, 17.2);
-  this.attack = 0;
-  this.sustain = rndr(0.023, 0.36);
-  this.decay = rndr(0.023, 0.2);
-  if (rnd(1))
-    this.highPassFrequency = frnd(3204);
-  if (rnd(1))
-    this.lowPassFrequency = rndr(2272, 44100);
-  return this;
-}
-
-
 Params.prototype.blipSelect = function () {
   this.wave_type = rnd(1);
   if (this.wave_type === SQUARE)
@@ -507,49 +350,55 @@ Params.prototype.blipSelect = function () {
   return this;
 }
 
-
-Knobs.prototype.blipSelect = function () {
-  this.shape = rnd(1);
-  if (this.shape === SQUARE)
-    this.dutyCycle = rndr(0.2, 0.5);
-  else
-    this.dutyCycle = 0;
-  this.frequency = rndr(145, 1274);
-  this.attack = 0;
-  this.sustain = rndr(0.023, 0.09);
-  this.decay = frnd(0.09);
-  this.highPassFrequency = 353;
+Params.prototype.synth = function () {
+  this.wave_type = rnd(1);
+  this.p_base_freq = [0.2723171360931539, 0.19255692561524382, 0.13615778746815113][rnd(2)];
+  this.p_env_attack = rnd(4) > 3 ? frnd(0.5) : 0;
+  this.p_env_sustain = frnd(1);
+  this.p_env_punch = frnd(1);
+  this.p_env_decay = frnd(0.9) + 0.1;
+  this.p_arp_mod = [0, 0, 0, 0, -0.3162, 0.7454, 0.7454][rnd(6)];
+  this.p_arp_speed = frnd(0.5) + 0.4;
+  this.p_duty = frnd(1);
+  this.p_duty_ramp = rnd(2) == 2 ? frnd(1) : 0;
+  this.p_lpf_freq = [1, frnd(1) * frnd(1)][rnd(1)];
+  this.p_lpf_ramp = rndr(-1, 1);
+  this.p_lpf_resonance = frnd(1);
+  this.p_hpf_freq = rnd(3) == 3 ? frnd(1) : 0;
+  this.p_hpf_ramp = rnd(3) == 3 ? frnd(1) : 0;
   return this;
 }
 
-
-Params.prototype.mutate = function () {
-  if (rnd(1)) this.p_base_freq += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_freq_ramp += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_freq_dramp += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_duty += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_duty_ramp += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_vib_strength += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_vib_speed += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_vib_delay += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_env_attack += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_env_sustain += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_env_decay += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_env_punch += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_lpf_resonance += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_lpf_freq += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_lpf_ramp += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_hpf_freq += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_hpf_ramp += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_pha_offset += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_pha_ramp += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_repeat_speed += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_arp_speed += frnd(0.1) - 0.05;
-  if (rnd(1)) this.p_arp_mod += frnd(0.1) - 0.05;
+Params.prototype.tone = function () {
+  this.wave_type = SINE;
+  this.p_base_freq = 0.35173364; // 440 Hz
+  this.p_env_attack = 0;
+  this.p_env_sustain = 0.6641; // 1 sec
+  this.p_env_decay = 0;
+  this.p_env_punch = 0;
+  return this;
 }
 
+Params.prototype.click = function() {
+  const base = ["explosion", "hitHurt"][rnd(1)];
+  this[base]();
+  if (rnd(1)) {
+    this.p_freq_ramp = -0.5 + frnd(1.0);
+  }
+  if (rnd(1)) {
+    this.p_env_sustain = (frnd(0.4) + 0.2) * this.p_env_sustain;
+    this.p_env_decay = (frnd(0.4) + 0.2) * this.p_env_decay;
+  }
+  if (rnd(3) == 0) {
+    this.p_env_attack = frnd(0.3);
+  }
+  this.p_base_freq = 1 - frnd(0.25);
+  this.p_hpf_freq = 1 - frnd(0.1);
+  return this;
+}
 
 Params.prototype.random = function () {
+  this.wave_type = rnd(3);
   if (rnd(1))
     this.p_base_freq = cube(frnd(2) - 1) + 0.5;
   else
@@ -588,93 +437,94 @@ Params.prototype.random = function () {
   return this;
 }
 
+Params.prototype.mutate = function () {
+  if (rnd(1)) this.p_base_freq += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_freq_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_freq_dramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_duty += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_duty_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_vib_strength += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_vib_speed += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_vib_delay += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_env_attack += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_env_sustain += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_env_decay += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_env_punch += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_lpf_resonance += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_lpf_freq += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_lpf_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_hpf_freq += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_hpf_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_pha_offset += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_pha_ramp += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_repeat_speed += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_arp_speed += frnd(0.1) - 0.05;
+  if (rnd(1)) this.p_arp_mod += frnd(0.1) - 0.05;
+  return this;
+}
 
-Knobs.prototype.random = function () {
-  if (rnd(1))
-    this.frequency = rndr(885.5, 7941.5);
-  else
-    this.frequency = rndr(3.5, 3532);
-  this.frequencySlide = rndr(-633, 639);
-  if (this.frequency > 1732 && this.frequencySlide > 5)
-    this.frequencySlide = -this.frequencySlide;
-  if (this.frequency < 145 && this.frequencySlide < -0.088)
-    this.frequencySlide = -this.frequencySlide;
-  this.frequencySlideSlide = rndr(-0.88, 0.88);
-  this.dutyCycle = frnd(1);
-  this.dudyCycleSweep = rndr(-17.64, 17.64);
-  this.vibratoDepth = rndr(-0.5, 0.5);
-  this.vibratoRate = rndr(0, 69);
-  this.attack = cube(frnd(1)) * 2.26;
-  this.sustain = sqr(frnd(1)) * 2.26 + 0.09;
-  this.decay = frnd(1) * 2.26;
-  this.punch = sqr(frnd(1)) * 0.64;
-  if (this.attack + this.sustain + this.decay < 0.45) {
-    this.sustain += rndr(0.5, 1.25);
-    this.decay += rndr(0.5, 1.25);
+/*** Simpler namespaced functional API ***/
+
+sfxr = {};
+
+sfxr.toBuffer = function(synthdef) {
+  return (new SoundEffect(synthdef)).getRawBuffer()["buffer"];
+};
+
+sfxr.toWebAudio = function(synthdef, audiocontext) {
+  var sfx = new SoundEffect(synthdef);
+  var buffer = _sfxr_getNormalized(sfx.getRawBuffer()["buffer"], sfx.bitsPerChannel);
+  if (audiocontext) {
+    var buff = audiocontext.createBuffer(1, buffer.length, sfx.sampleRate);
+    var nowBuffering = buff.getChannelData(0);
+    for (var i = 0; i < buffer.length; i++) {
+      nowBuffering[i] = buffer[i];
+    }
+    var proc = audiocontext.createBufferSource();
+    proc.buffer = buff;
+    return proc;
   }
-  this.lowPassResonance = rndr(0.444, 0.97);
-  this.lowPassFrequency = frnd(39200);
-  this.lowPassSweep = rndr(0.012, 82);
-  if (this.lowPassFrequency < 35 && this.lowPassSweep < 0.802)
-    this.lowPassSweep = 1 - this.lowPassSweep;
-  this.highPassFrequency = 39200 * pow(frnd(1), 5);
-  this.highPassSweep = 555718 * pow(rndr(-1, 1), 5);
-  this.flangerOffset = 0.023 * cube(frnd(2) - 1);
-  this.flangerSweep = cube(frnd(2) - 1);
-  this.retriggerRate = frnd(1378);
-  this.arpeggioDelay = frnd(1.81);
-  this.arpeggioFactor = rndr(0.09, 10);
-  return this;
+};
+
+sfxr.toWave = function(synthdef) {
+  return (new SoundEffect(synthdef)).generate();
+};
+
+sfxr.toAudio = function(synthdef) {
+  return (new SoundEffect(synthdef)).generate().getAudio();
 }
 
-
-Params.prototype.tone = function () {
-  this.wave_type = SINE;
-  this.p_base_freq = 0.35173364; // 440 Hz
-  this.p_env_attack = 0;
-  this.p_env_sustain = 0.6641; // 1 sec
-  this.p_env_decay = 0;
-  this.p_env_punch = 0;
-  return this;
+sfxr.b58decode = function(b58encoded) {
+  var decoded = function(S,A){var d=[],b=[],i,j,c,n;for(i in S){j=0,c=A.indexOf(S[i]);if(c<0)return undefined;c||b.length^i?i:b.push(0);while(j in d||c){n=d[j];n=n?n*58+c:c;c=n>>8;d[j]=n%256;j++}}while(j--)b.push(d[j]);return new Uint8Array(b)}(b58encoded,b58alphabet);
+  var result = {};
+  for (var pi in params_order) {
+    var p = params_order[pi];
+    var offset = (pi - 1) * 4 + 1;
+    if (p == "wave_type") {
+      result[p] = decoded[0];
+    } else {
+      var val = (decoded[offset] | (decoded[offset + 1] << 8) | (decoded[offset + 2] << 16) | (decoded[offset + 3] << 24));
+      result[p] = numberToFloat(val);
+    }
+  }
+  return result;
 }
 
-
+/*** Main entry point ***/
 
 function SoundEffect(ps) {
-  if (ps.oldParams)
-    this.initFromUI(ps);
-  else
-    this.init(ps);
+  if (typeof(ps) == "string") {
+    var PARAMS = new Params();
+    if (ps.indexOf("#") == 0) {
+      ps = ps.slice(1);
+    }
+    ps = PARAMS.fromB58(ps);
+  }
+  this.init(ps);
 }
 
-
-SoundEffect.prototype.initFromUI = function (ps) {
-  //
-  // Convert user-facing parameter values to units usable by the sound
-  // generator
-  //
-
-  this.initForRepeat = function() {
-    this.elapsedSinceRepeat = 0;
-
-    this.period = 100 / (ps.p_base_freq * ps.p_base_freq + 0.001);
-    this.periodMax = 100 / (ps.p_freq_limit * ps.p_freq_limit + 0.001);
-    this.enableFrequencyCutoff = (ps.p_freq_limit > 0);
-    this.periodMult = 1 - Math.pow(ps.p_freq_ramp, 3) * 0.01;
-    this.periodMultSlide = -Math.pow(ps.p_freq_dramp, 3) * 0.000001;
-
-    this.dutyCycle = 0.5 - ps.p_duty * 0.5;
-    this.dutyCycleSlide = -ps.p_duty_ramp * 0.00005;
-
-    if (ps.p_arp_mod >= 0)
-      this.arpeggioMultiplier = 1 - Math.pow(ps.p_arp_mod, 2) * .9;
-    else
-      this.arpeggioMultiplier = 1 + Math.pow(ps.p_arp_mod, 2) * 10;
-    this.arpeggioTime = Math.floor(Math.pow(1 - ps.p_arp_speed, 2) * 20000 + 32);
-    if (ps.p_arp_speed === 1)
-      this.arpeggioTime = 0;
-  }
-
+SoundEffect.prototype.init = function (ps) {
+  this.parameters = ps;
   this.initForRepeat();  // First time through, this is a bit of a misnomer
 
   // Waveform shape
@@ -718,77 +568,31 @@ SoundEffect.prototype.initFromUI = function (ps) {
 
   this.sampleRate = ps.sample_rate;
   this.bitsPerChannel = ps.sample_size;
-
-  for (var i in this) if (typeof this[i] !== 'function') console.log(i, this[i]);
 }
 
+SoundEffect.prototype.initForRepeat = function() {
+  var ps = this.parameters;
+  this.elapsedSinceRepeat = 0;
 
+  this.period = 100 / (ps.p_base_freq * ps.p_base_freq + 0.001);
+  this.periodMax = 100 / (ps.p_freq_limit * ps.p_freq_limit + 0.001);
+  this.enableFrequencyCutoff = (ps.p_freq_limit > 0);
+  this.periodMult = 1 - Math.pow(ps.p_freq_ramp, 3) * 0.01;
+  this.periodMultSlide = -Math.pow(ps.p_freq_dramp, 3) * 0.000001;
 
-SoundEffect.prototype.init = function (ps) {
-  //
-  // Convert user-facing parameter values to units usable by the sound
-  // generator
-  //
+  this.dutyCycle = 0.5 - ps.p_duty * 0.5;
+  this.dutyCycleSlide = -ps.p_duty_ramp * 0.00005;
 
-  this.initForRepeat = function() {
-    this.elapsedSinceRepeat = 0;
-
-    this.period = OVERSAMPLING * 44100 / ps.frequency;
-    this.periodMax = OVERSAMPLING * 44100 / ps.frequencyMin;
-    this.enableFrequencyCutoff = (ps.frequencyMin > 0);
-    this.periodMult = Math.pow(.5, ps.frequencySlide / 44100);
-    this.periodMultSlide = ps.frequencySlideSlide * Math.pow(2, -44101/44100)
-      / 44100;
-
-    this.dutyCycle = ps.dutyCycle;
-    this.dutyCycleSlide = ps.dutyCycleSweep / (OVERSAMPLING * 44100);
-
-    this.arpeggioMultiplier = 1 / ps.arpeggioFactor;
-    this.arpeggioTime = ps.arpeggioDelay * 44100;
-  }
-  this.initForRepeat();  // First time through, this is a bit of a misnomer
-
-  // Waveform shape
-  this.waveShape = ps.shape;
-
-  // Low pass filter
-  this.fltw = ps.lowPassFrequency / (OVERSAMPLING * 44100 + ps.lowPassFrequency);
-  this.enableLowPassFilter = ps.lowPassFrequency < 44100;
-  this.fltw_d = Math.pow(ps.lowPassSweep, 1/44100);
-  this.fltdmp = (1 - ps.lowPassResonance) * 9 * (.01 + this.fltw);
-
-  // High pass filter
-  this.flthp = ps.highPassFrequency / (OVERSAMPLING * 44100 + ps.highPassFrequency);
-  this.flthp_d = Math.pow(ps.highPassSweep, 1/44100);
-
-  // Vibrato
-  this.vibratoSpeed = ps.vibratoRate * 64 / 44100 / 10;
-  this.vibratoAmplitude = ps.vibratoDepth;
-
-  // Envelope
-  this.envelopeLength = [
-    Math.floor(ps.attack * 44100),
-    Math.floor(ps.sustain * 44100),
-    Math.floor(ps.decay * 44100)
-  ];
-  this.envelopePunch = ps.punch;
-
-  // Flanger
-  this.flangerOffset = ps.flangerOffset * 44100;
-  this.flangerOffsetSlide = ps.flangerSweep;
-
-  // Repeat
-  this.repeatTime = ps.retriggerRate ? 1 / (44100 * ps.retriggerRate) : 0;
-
-  // Gain
-  this.gain = Math.sqrt(Math.pow(10, ps.gain/10));
-
-  this.sampleRate = ps.sampleRate;
-  this.bitsPerChannel = ps.sampleSize;
+  if (ps.p_arp_mod >= 0)
+    this.arpeggioMultiplier = 1 - Math.pow(ps.p_arp_mod, 2) * .9;
+  else
+    this.arpeggioMultiplier = 1 + Math.pow(ps.p_arp_mod, 2) * 10;
+  this.arpeggioTime = Math.floor(Math.pow(1 - ps.p_arp_speed, 2) * 20000 + 32);
+  if (ps.p_arp_speed === 1)
+    this.arpeggioTime = 0;
 }
 
-
-SoundEffect.prototype.generate = function () {
+SoundEffect.prototype.getRawBuffer = function () {
   var fltp = 0;
   var fltdp = 0;
   var fltphp = 0;
@@ -978,46 +782,115 @@ SoundEffect.prototype.generate = function () {
       buffer.push((sample >> 8) & 0xFF);
     }
   }
+  
+  return {
+    "buffer": buffer,
+    "clipped": num_clipped,
+  }
+}
 
+SoundEffect.prototype.generate = function() {
+  var rendered = this.getRawBuffer();
   var wave = new RIFFWAVE();
+  var normalized = _sfxr_getNormalized(rendered.buffer, this.bitsPerChannel);
   wave.header.sampleRate = this.sampleRate;
   wave.header.bitsPerSample = this.bitsPerChannel;
-  wave.Make(buffer);
-  wave.clipping = num_clipped;
+  wave.Make(rendered.buffer);
+  wave.clipping = rendered.clipped;
+  wave.buffer = normalized;
+  wave.getAudio = _sfxr_getAudioFn(wave);
   return wave;
 }
 
-
-Knobs.prototype.tone = function () {
-  this.shape = SINE;
-  this.frequency = 440;
-  this.attack = 0;
-  this.sustain = 1;
-  this.decay = 0;
-  return this;
+var _sfxr_getNormalized = function(buffer, bitsPerChannel) {
+  // normalize buffer
+  var normalized = new Float32Array(buffer.length);
+  for (var b=0; b<buffer.length; b++) {
+    normalized[b] = 2.0 * buffer[b] / pow(2, bitsPerChannel) - 1.0;
+  }
+  return normalized;
 }
 
-
-var genners = 'pickupCoin,laserShoot,explosion,powerUp,hitHurt,jump,blipSelect,random,tone'.split(',');
-for (var i = 0; i < genners.length; ++i) {
-  (function (g) {
-    if (!Knobs.prototype[g])
-      Knobs.prototype[g] = function () {
-        return this.translate(new Params()[g]());
+var _actx = null;
+var _sfxr_getAudioFn = function(wave) {
+  return function() {
+    // check for procedural audio
+    var actx = null;
+    if (!_actx) {
+      if ('AudioContext' in window) {
+        _actx = new AudioContext();
+      } else if ('webkitAudioContext' in window) {
+        _actx = new webkitAudioContext();
       }
-  })(genners[i]);
-}
+    }
+    actx = _actx;
+    
+    if (actx) {
+      var buff = actx.createBuffer(1, wave.buffer.length, wave.header.sampleRate);
+      var nowBuffering = buff.getChannelData(0);
+      for (var i=0;i<wave.buffer.length;i++) {
+        nowBuffering[i] = wave.buffer[i];
+      }
+      var volume = 1.0;
+      var obj = {
+        "channels": [],
+        "setVolume": function(v) { volume = v; return obj; },
+        "play": function() {
+          var proc = actx.createBufferSource();
+          proc.buffer = buff;
+          var gainNode = actx.createGain()
+          gainNode.gain.value = volume;
+          gainNode.connect(actx.destination)
+          proc.connect(gainNode);
+          if (proc["start"]) {
+            proc.start();
+          } else if (proc["noteOn"]) {
+            proc.noteOn(0);
+          }
+          this.channels.push(proc);
+          return proc;
+        }
+      };
+      return obj;
+    } else {
+      var audio = new Audio();
+      audio.src = wave.dataURI;
+      return audio;
+    }
+  };
+};
 
+/*** Plumbing ***/
 
-
-// For node.js
-if (typeof exports !== 'undefined')  {
-  var RIFFWAVE = require("./riffwave").RIFFWAVE;
-  exports.Params = Params;
-  exports.Knobs = Knobs;
-  exports.SoundEffect = SoundEffect;
-  exports.SQUARE = SQUARE;
-  exports.SAWTOOTH = SAWTOOTH;
-  exports.SINE = SINE;
-  exports.NOISE = NOISE;
-}
+(function (root, factory) {
+  if(typeof define === "function" && define.amd) {
+    // Now we're wrapping the factory and assigning the return
+    // value to the root (window) and returning it as well to
+    // the AMD loader.
+    define(["riffwave"], function(RIFFWAVE){
+      return (root.jsfxr = factory(RIFFWAVE));
+    });
+  } else if(typeof module === "object" && module.exports) {
+    // I've not encountered a need for this yet, since I haven't
+    // run into a scenario where plain modules depend on CommonJS
+    // *and* I happen to be loading in a CJS browser environment
+    // but I'm including it for the sake of being thorough
+    RIFFWAVE = require("./riffwave.js");
+    module.exports = (root.jsfxr = factory(RIFFWAVE));
+  } else {
+    root.jsfxr = factory(root.RIFFWAVE);
+  }
+}(this, function(RIFFWAVE) {
+  // module code here....
+  return {
+    "Params": Params,
+    "SoundEffect": SoundEffect,
+    "sfxr": sfxr,
+    "waveforms": {
+      "SQUARE": SQUARE,
+      "SAWTOOTH": SAWTOOTH,
+      "SINE": SINE,
+      "NOISE": NOISE
+    }
+  };
+}));
