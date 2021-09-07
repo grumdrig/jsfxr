@@ -352,7 +352,7 @@ Params.prototype.blipSelect = function () {
 
 Params.prototype.synth = function () {
   this.wave_type = rnd(1);
-  this.p_base_freq = rnd(1) ? 0.2477 : 0.1737;
+  this.p_base_freq = [0.2723171360931539, 0.19255692561524382, 0.13615778746815113][rnd(2)];
   this.p_env_attack = rnd(4) > 3 ? frnd(0.5) : 0;
   this.p_env_sustain = frnd(1);
   this.p_env_punch = frnd(1);
@@ -376,6 +376,24 @@ Params.prototype.tone = function () {
   this.p_env_sustain = 0.6641; // 1 sec
   this.p_env_decay = 0;
   this.p_env_punch = 0;
+  return this;
+}
+
+Params.prototype.click = function() {
+  const base = ["explosion", "hitHurt"][rnd(1)];
+  this[base]();
+  if (rnd(1)) {
+    this.p_freq_ramp = -0.5 + frnd(1.0);
+  }
+  if (rnd(1)) {
+    this.p_env_sustain = (frnd(0.4) + 0.2) * this.p_env_sustain;
+    this.p_env_decay = (frnd(0.4) + 0.2) * this.p_env_decay;
+  }
+  if (rnd(3) == 0) {
+    this.p_env_attack = frnd(0.3);
+  }
+  this.p_base_freq = 1 - frnd(0.25);
+  this.p_hpf_freq = 1 - frnd(0.1);
   return this;
 }
 
@@ -830,6 +848,7 @@ var _sfxr_getAudioFn = function(wave) {
             proc.noteOn(0);
           }
           this.channels.push(proc);
+          return proc;
         }
       };
       return obj;

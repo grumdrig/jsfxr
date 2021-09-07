@@ -1,7 +1,4 @@
 {
   "name": "jsfxr",
-  "version": "0.0.2",
-  "dependencies": {
-    "express": "2.2.0"
-  }
+  "version": "0.0.5"
 }

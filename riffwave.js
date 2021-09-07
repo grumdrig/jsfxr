@@ -103,7 +103,7 @@ var RIFFWAVE = function(data) {
   this.Make = function(data) {
     if (data instanceof Array) this.data = data;
     this.header.blockAlign = (this.header.numChannels * this.header.bitsPerSample) >> 3;
-    this.header.byteRate = this.header.blockAlign * this.sampleRate;
+    this.header.byteRate = this.header.blockAlign * this.header.sampleRate;
     this.header.subChunk2Size = this.data.length * (this.header.bitsPerSample >> 3);
     this.header.chunkSize = 36 + this.header.subChunk2Size;
 
