@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>jsfxr</title>
+<title>jsfxr - 8 bit sound maker and online sfx generator</title>
+<meta name="description" content="A simple online 8 bit sound maker and sfx generator. You can also use it as a sound library in your JavaScript games.">
 
 <meta charset="utf-8" >
+<meta name="viewport" content="width=device-width, initial-scale=0.95">
 
 <script src="riffwave.js"></script>
 <script src="sfxr.js"></script>
@@ -34,8 +36,13 @@ function gen(fx) {
   PARAMS.sound_vol = SOUND_VOL;
   PARAMS.sample_rate = SAMPLE_RATE;
   PARAMS.sample_size = SAMPLE_SIZE;
-  PARAMS[fx]();
-  $("#wav").text(fx + ".wav");
+  if (fx.indexOf("#") == 0) {
+    PARAMS.fromB58(fx.slice(1));
+    $("#wav").text("random.wav").attr("download", "random.wav");
+  } else {
+    PARAMS[fx]();
+    $("#wav").text(fx + ".wav").attr("download", fx + ".wav");
+  }
   updateUi();
   play();
 }
@@ -47,20 +54,46 @@ function mut() {
 }
 
 function play(noregen) {
-  setTimeout(function () { 
-    var audio = new Audio();
     if (!noregen) {
+      var b58 = PARAMS.toB58();
+      if (document.location.href.indexOf("#") != -1) {
+        document.location.hash = PARAMS.toB58();
+      }
+      $("#permalink").attr("href", "#" + b58)
+      $("#permalink").text(b58)
+      $("#share").attr("href", "#" + b58)
       SOUND = new SoundEffect(PARAMS).generate();
       $("#file_size").text(Math.round(SOUND.wav.length / 1024) + "kB");
       $("#num_samples").text(SOUND.header.subChunk2Size / 
                              (SOUND.header.bitsPerSample >> 3));
       $("#clipping").text(SOUND.clipping);
     }
-    audio.src = SOUND.dataURI;
-    $("#wav").attr("href", SOUND.dataURI);
+    
+    $("#wav").attr("href", SOUND.dataURI)  ;
     $("#sfx").attr("href", "sfx.wav?" + PARAMS.query());
-    audio.play(); 
-  }, 0);
+    
+    SOUND.getAudio().play();
+}
+
+function copy() {
+  var b = $("#copybuffer");
+  b.css("display", "block");
+  b.val($("#permalink").text());
+  b.select();
+  document.execCommand("copy");
+  b.css("display", "none");
+}
+
+function serialize_params() {
+  $("textarea").val(JSON.stringify(PARAMS, null, 2));
+  $("#serialize").show();
+}
+
+function deserialize_params() {
+  var newPARAMS = JSON.parse($("textarea").val());
+  PARAMS.fromJSON(newPARAMS);
+  play();
+  updateUi();
 }
 
 function disenable() {
@@ -229,8 +262,8 @@ $(function() {
     control.convert = CONVERSIONS[p];
     control.units = UNITS[p];
   }
-
-  gen("pickupCoin");
+  
+  gen(document.location.hash || "pickupCoin");
 });
 
 function convert(control, v) {
@@ -249,7 +282,7 @@ function convert(control, v) {
 
 <style>
 
-button, p, #sound_vol {
+button, #soundexport, #sound_vol {
   width: 160px;
 }
 
@@ -273,6 +306,24 @@ button, p, #sound_vol {
   font-weight: bold;
 }
 
+#share {
+  font-weight: bold;
+  font-size: 1.25em;
+  margin-top: 1em;
+  display: inline-block;
+}
+
+#permalink {
+  font-size: 0.75em;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  display: block;
+  margin-top: 1em;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow: hidden;
+}
 
 div {
   display: inline-block;
@@ -285,7 +336,11 @@ h1 {
 }
 
 body {
-  padding-left: 2em;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 800px;
+  width: 98%;
+  text-align: center;
 }
 
 .slider {
@@ -322,6 +377,23 @@ hr {
 
 #demo-frame > div.demo { padding: 10px !important; }
 
+div.demo {
+   text-align: center;
+   margin-left: auto;
+   margin-right: auto;
+}
+
+table {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+div#export {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 #stats td {
   text-align: right;
 }
@@ -336,20 +408,36 @@ a {
 }
 
 #uncopy {
-  margin-top: -4px;
-  border: solid 1px #0000ff;
-  border-radius: 10px;
-  width: 8px;
-  height: 8px;
-  display: inline-block;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 6px;
-  font-size: 10px;
 }
 
 #generators button {
   margin-bottom: 2px;
+}
+
+#data {
+  width: 80%;
+  margin-top: 1em;
+}
+
+#data textarea {
+  width: 80%;
+  height: 40em;
+  margin-top: 1em;
+  min-width: 250px;
+}
+
+#copybuffer {
+  display: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#serialize {
+  display: none;
+}
+
+#serialize > button {
+  margin-top: 1em;
 }
 
 </script>
@@ -371,13 +459,18 @@ a {
   <button onclick="gen('powerUp')">Powerup</button> <br/>
   <button onclick="gen('hitHurt')">Hit/hurt</button> <br/>
   <button onclick="gen('jump')">Jump</button> <br/>
+  <button onclick="gen('click')">Click</button> <br/>
   <button onclick="gen('blipSelect')">Blip/select</button> <br/>
+  <button onclick="gen('synth')">Synth</button> <br/>
   <button onclick="gen('random')">Random</button> <br/>
   <button onclick="gen('tone')">Tone</button> <br/>
   <br/>
-  <br/>
-  <br/>
   <button onclick="mut()">Mutate</button> <br/>
+  <p>
+    <button onclick="play(true)">Play</button><br/>
+    <button onclick="copy()">Copy</button>
+  </p>
+  <input id="copybuffer"/>
 </div>
 
 <div class="demo">
@@ -434,15 +527,14 @@ a {
 
 </div>
 
-<div>
+<div id="export">
   <h2>Sound</h2>
-  <button onclick="play(true)">Play</button> <br/>
-
-  <p>
-To save the sound, right- or control-click the following link, select 
-"Save As..." and choose a name with a ".wav" extension. <br/>
+  <p id="soundexport">
+  Link to save the sound as a wav file:<br/>
   <br/>
-  <a id="wav">sfx.wav</a> <br/>
+  Save: <a id="wav">sfx.wav</a> <br/>
+  <a id="share">permalink</a> <br/>
+  <a id="permalink"></a>
   <!-- <a id="sfx">sfx.wav</a><br/> -->
 
   <table id="stats">
@@ -480,36 +572,33 @@ To save the sound, right- or control-click the following link, select
       <label for="8">8 bit</label>
   </div>
 </form>
-  
-<br/>
-<br/>
-<br/>
-
-<hr/>
-<p id="links">
-<a id="uncopy" href="UNLICENSE">¢</a> 2011
-<a href="http://fredricksen.net/">Eric Fredricksen</a>
-<br/>
-  <a href="https://github.com/grumdrig/jsfxr" id="source">(Source code)</a>
-<br/>
-<br/>
- (Port of 
- <a href="http://www.drpetter.se/project_sfxr.html" id="original">sfxr</a> 
-by DrPetter)
-</p>
-
-
 
 </div>
-
 <br/>
+<div id="data">
+  <button onclick="serialize_params();"> ▼ Serialize</button>
+  <button onclick="deserialize_params()"> ▲ Deserialize</button>
+  <div id="serialize">
+    <textarea></textarea>
+    <button onclick="$('textarea').select(); document.execCommand('copy');">Copy</button>
+    <button onclick="$('#serialize').hide();">Hide ✕</button>
+  </div>
+</div>
+
+<div id="links">
+<h1>about jsfxr</h1>
+<p>Jsfxr is an online 8 bit sound maker and sfx generator. All you need to make retro sound effects with jsfxr is a web browser. It's a JavaScript port of the original <a href="http://www.drpetter.se/project_sfxr.html" id="original">sfxr</a> by DrPetter. You can also use it as a <a href='https://github.com/chr15m/jsfxr#use'>JavaScript library</a> for playing and rendering sfxr sound effects in your games.</p>
 <br/>
-
-
+(Port of <a href="http://www.drpetter.se/project_sfxr.html" id="original">sfxr</a> by DrPetter)<br/>
+<a id="uncopy" href="UNLICENSE">¢</a> 2011
+<a href="http://fredricksen.net/">Eric Fredricksen</a><br/>
+With <a href='https://github.com/chr15m/jsfxr'>contributions</a> from Chris McCormick<br/>
 <br/>
-
-
-
+<a href="https://github.com/chr15m/jsfxr" id="source">(Source code)</a>
+<br/>
+<p><a href='https://github.com/chr15m/jsfxr#use'>See the documentation for using these sounds in your JavaScript game</a>.</p>
+<p>Tip: use the <code>sfxr-to-wav</code> nodejs script to convert to a wave file on the command line.</p>
+</div>
 
 </body>
 </html>

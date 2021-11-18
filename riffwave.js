@@ -1,22 +1,19 @@
 /*
- * RIFFWAVE.js v0.02 - Audio encoder for HTML5 <audio> elements.
- * Copyright (C) 2011 Pedro Ladaria <pedro.ladaria at Gmail dot com>
+ * RIFFWAVE.js v0.03 - Audio encoder for HTML5 <audio> elements.
+ * Copyleft 2011 by Pedro Ladaria <pedro.ladaria at Gmail dot com>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
- * The full license is available at http://www.gnu.org/licenses/gpl.html
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
+ * Public Domain
  *
  * Changelog:
  *
  * 0.01 - First release
  * 0.02 - New faster base64 encoding
+ * 0.03 - Support for 16bit samples
+ *
+ * Notes:
+ *
+ * 8 bit data is unsigned: 0..255
+ * 16 bit data is signed: -32,768..32,767
  *
  */
 
@@ -64,7 +61,7 @@ FastBase64.Init();
 
 var RIFFWAVE = function(data) {
 
-  this.data = [];        // Byte array containing audio samples
+  this.data = [];        // Array containing audio samples
   this.wav = [];         // Array containing the generated wave file
   this.dataURI = '';     // http://en.wikipedia.org/wiki/Data_URI_scheme
 
@@ -75,24 +72,39 @@ var RIFFWAVE = function(data) {
     subChunk1Id  : [0x66,0x6d,0x74,0x20], // 12   4    "fmt " = 0x666d7420
     subChunk1Size: 16,                    // 16   4    16 for PCM
     audioFormat  : 1,                     // 20   2    PCM = 1
-    numChannels  : 1,                     // 22   2    Mono = 1, Stereo = 2, etc.
-    sampleRate   : 8000,                  // 24   4    8000, 44100, etc
+    numChannels  : 1,                     // 22   2    Mono = 1, Stereo = 2...
+    sampleRate   : 8000,                  // 24   4    8000, 44100...
     byteRate     : 0,                     // 28   4    SampleRate*NumChannels*BitsPerSample/8
     blockAlign   : 0,                     // 32   2    NumChannels*BitsPerSample/8
-    bitsPerSample: 8,                     // 34   2    8 bits = 8, 16 bits = 16, etc...
+    bitsPerSample: 8,                     // 34   2    8 bits = 8, 16 bits = 16
     subChunk2Id  : [0x64,0x61,0x74,0x61], // 36   4    "data" = 0x64617461
     subChunk2Size: 0                      // 40   4    data size = NumSamples*NumChannels*BitsPerSample/8
   };
 
-  function u32ToArray(i) { return [i&0xFF, (i>>8)&0xFF, (i>>16)&0xFF, (i>>24)&0xFF]; }
+  function u32ToArray(i) {
+    return [i&0xFF, (i>>8)&0xFF, (i>>16)&0xFF, (i>>24)&0xFF];
+  }
 
-  function u16ToArray(i) { return [i&0xFF, (i>>8)&0xFF]; }
+  function u16ToArray(i) {
+    return [i&0xFF, (i>>8)&0xFF];
+  }
+
+  function split16bitArray(data) {
+    var r = [];
+    var j = 0;
+    var len = data.length;
+    for (var i=0; i<len; i++) {
+      r[j++] = data[i] & 0xFF;
+      r[j++] = (data[i]>>8) & 0xFF;
+    }
+    return r;
+  }
 
   this.Make = function(data) {
     if (data instanceof Array) this.data = data;
-    this.header.byteRate = (this.header.sampleRate * this.header.numChannels * this.header.bitsPerSample) >> 3;
     this.header.blockAlign = (this.header.numChannels * this.header.bitsPerSample) >> 3;
-    this.header.subChunk2Size = this.data.length;
+    this.header.byteRate = this.header.blockAlign * this.header.sampleRate;
+    this.header.subChunk2Size = this.data.length * (this.header.bitsPerSample >> 3);
     this.header.chunkSize = 36 + this.header.subChunk2Size;
 
     this.wav = this.header.chunkId.concat(
@@ -108,7 +120,7 @@ var RIFFWAVE = function(data) {
       u16ToArray(this.header.bitsPerSample),
       this.header.subChunk2Id,
       u32ToArray(this.header.subChunk2Size),
-      this.data
+      (this.header.bitsPerSample == 16) ? split16bitArray(this.data) : this.data
     );
     this.dataURI = 'data:audio/wav;base64,'+FastBase64.Encode(this.wav);
   };
@@ -117,6 +129,24 @@ var RIFFWAVE = function(data) {
 
 }; // end RIFFWAVE
 
-
-if (typeof exports != 'undefined')  // For node.js
-  exports.RIFFWAVE = RIFFWAVE;
+(function (root, factory) {
+  if(typeof define === "function" && define.amd) {
+    // Now we're wrapping the factory and assigning the return
+    // value to the root (window) and returning it as well to
+    // the AMD loader.
+    define([], function(){
+      return (root.RIFFWAVE = factory());
+    });
+  } else if(typeof module === "object" && module.exports) {
+    // I've not encountered a need for this yet, since I haven't
+    // run into a scenario where plain modules depend on CommonJS
+    // *and* I happen to be loading in a CJS browser environment
+    // but I'm including it for the sake of being thorough
+    module.exports = (root.RIFFWAVE = factory());
+  } else {
+    root.RIFFWAVE = factory();
+  }
+}(this, function() {
+  // module code here....
+  return RIFFWAVE;
+}));
