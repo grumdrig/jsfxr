@@ -980,7 +980,7 @@ var units = {
     "Params": Params,
     "SoundEffect": SoundEffect,
     "sfxr": sfxr,
-    "convert1k": convert,
+    "convert1k": convert1k,
     "units": units,
     "waveforms": {
       "SQUARE": SQUARE,
