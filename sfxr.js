@@ -514,6 +514,12 @@ sfxr.b58decode = function(b58encoded) {
   return result;
 }
 
+sfxr.b58encode = function(synthdef) {
+  var p = new Params();
+  p.fromJSON(synthdef);
+  return p.toB58();
+}
+
 sfxr.generate = function(algorithm, options) {
   const p = new Params();
   const opts = options || {};

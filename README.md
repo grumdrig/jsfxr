@@ -96,7 +96,7 @@ var a = sfxr.toAudio(sound);
 a.play();
 ```
 
-You can also use the short URL compressed version of the sound::
+You can also use the short URL compressed version of the sound:
 
 ```javascript
 var a = sfxr.toAudio("5EoyNVSymuxD8s7HP1ixqdaCn5uVGEgwQ3kJBR7bSoApFQzm7E4zZPW2EcXm3jmNdTtTPeDuvwjY8z4exqaXz3NGBHRKBx3igYfBBMRBxDALhBSvzkF6VE2Pv");
@@ -109,6 +109,13 @@ By default the buffer contains audio rendered at a sample rate of `44100`.
 ```
 var buffer = sfxr.toBuffer(sound);
 console.log(buffer);
+```
+
+You can convert between the base58 short-url encoded format and JSON using `b58encode` and `b58decode`:
+
+```
+var b58string = sfxr.b58encode(sound);
+var sound = sfxr.b58decode(b58string);
 ```
 
 You can also access the lower level classes `SoundEffect` and `Params` if you need to.
