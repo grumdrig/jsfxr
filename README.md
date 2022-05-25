@@ -20,7 +20,7 @@ You can use the jsxfr library to play sounds in your JavaScript game code.
 Install it:
 
 ```
-npm i @chr15m/jsfxr
+npm i chr15m/jsfxr
 ```
 
 Require it:
