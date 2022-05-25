@@ -491,7 +491,11 @@ sfxr.toWave = function(synthdef) {
 };
 
 sfxr.toAudio = function(synthdef) {
-  return (new SoundEffect(synthdef)).generate().getAudio();
+  return sfxr.toWave(synthdef).getAudio();
+}
+
+sfxr.play = function(synthdef) {
+  return sfxr.toAudio(synthdef).play();
 }
 
 sfxr.b58decode = function(b58encoded) {
@@ -508,6 +512,15 @@ sfxr.b58decode = function(b58encoded) {
     }
   }
   return result;
+}
+
+sfxr.generate = function(algorithm, options) {
+  const p = new Params();
+  const opts = options || {};
+  p.sound_vol = opts["sound_vol"] || 0.25;
+  p.sample_rate = opts["sample_rate"] || 44100;
+  p.sample_size = opts["sample_size"] || 8;
+  return p[algorithm]();
 }
 
 /*** Main entry point ***/

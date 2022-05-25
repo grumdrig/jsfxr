@@ -44,26 +44,20 @@ You can then directly use the `SoundEffect`, `Params` etc.
 
 ## API
 
-Generate a sound effect using a preset algorithm.
+Generate a sound effect using a preset algorithm and play it using webaudio API.
 
 ```javascript
-const Params = require("jsfxr").Params;
+const sfxr = require("jsfxr").sfxr;
 
 const preset = "pickupCoin";
+const sound = sfxr.generate(preset);
 
-const p = new Params();
-p.sound_vol = SOUND_VOL;
-p.sample_rate = SAMPLE_RATE;
-p.sample_size = SAMPLE_SIZE;
-const sound = p[preset]();
-
-const s = new SoundEffect(sound).generate();
-s.getAudio().play();
+sfxr.play(sound);
 ```
 
 Available presets are `pickupCoin`, `laserShoot`, `explosion`, `powerUp`, `hitHurt`, `jump`, `blipSelect`, `synth`, `tone`, `click`, and `random`.
 
-You can also use the interface at https://sfxr.me to find the sound you want and then get the sound definition.
+You can also use the interface at https://sfxr.me to find the sound you want and then use the sound definition.
 Click the "serialize" button and copy the JSON code for the sound you want.
 You will get a datastructure that you can use like this:
 
@@ -98,29 +92,27 @@ var sound = {
   "sample_size": 8
 };
 
-var s = new SoundEffect(sound).generate();
-// returns a webaudio object if supported, or an Audio object
-s.getAudio().play();
+var a = sfxr.toAudio(sound);
+a.play();
 ```
 
 You can also use the short URL compressed version of the sound::
 
 ```javascript
-var s = new SoundEffect("5EoyNVSymuxD8s7HP1ixqdaCn5uVGEgwQ3kJBR7bSoApFQzm7E4zZPW2EcXm3jmNdTtTPeDuvwjY8z4exqaXz3NGBHRKBx3igYfBBMRBxDALhBSvzkF6VE2Pv").generate();
-s.getAudio().play();
+var a = sfxr.toAudio("5EoyNVSymuxD8s7HP1ixqdaCn5uVGEgwQ3kJBR7bSoApFQzm7E4zZPW2EcXm3jmNdTtTPeDuvwjY8z4exqaXz3NGBHRKBx3igYfBBMRBxDALhBSvzkF6VE2Pv");
+a.play();
 ```
 
-You can also access an array of samples if you want to use the WebAudio API to play the sound. By default the audio is rendered at a sample rate of `44100`.
+You can also access an array of samples.
+By default the buffer contains audio rendered at a sample rate of `44100`.
 
 ```
-console.log(s.buffer)
+var buffer = sfxr.toBuffer(sound);
+console.log(buffer);
 ```
 
-You can find more example code for using the WebAudio API on lines 55 and 81 of the index.html file.
-
-* 55: https://github.com/chr15m/jsfxr/blob/master/index.html#L55
-* 81: https://github.com/chr15m/jsfxr/blob/master/index.html#L81
-* index.html: https://github.com/chr15m/jsfxr/blob/master/index.html
+You can also access the lower level classes `SoundEffect` and `Params` if you need to.
+This can be useful for caching the internal representation for efficiency, or mutating the sound with `params.mutate()`.
 
 # links
 
