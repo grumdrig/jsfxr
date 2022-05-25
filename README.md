@@ -13,7 +13,7 @@ Maintained by Chris McCormick.
 
 # Library
 
-You can use the jsxfr library to play sounds in your JavaScript game code.
+You can use the jsxfr library to generate and play sounds in your JavaScript game code.
 
 ## Node
 
@@ -26,7 +26,7 @@ npm i chr15m/jsfxr
 Require it:
 
 ```
-const SoundEffect = require("jsfxr").SoundEffect;
+const sfxr = require("jsfxr").sfxr;
 ```
 
 See [API](#API) below for usage examples.
@@ -40,7 +40,7 @@ Include the scripts in your page:
 <script src="https://sfxr.me/sfxr.js"></script>
 ```
 
-You can then directly use the `SoundEffect`, `Params` etc.
+You can then directly use the `sfxr` namespace without requiring it.
 
 ## API
 
