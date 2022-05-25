@@ -1,22 +1,46 @@
-jsfxr
-=====
-
 Quick 'n' easy game sound effects generator.
 
-A port of sfxr: http://www.drpetter.se/project_sfxr.html to HTML5.
+App 👉 https://sfxr.me
 
-.. image:: screenshot.png
+[About](#about) | [Library](#library)
 
-use
-===
+# About
 
-You can use the sounds you make with sfxr in your game code.
+A port of [sfxr](http://www.drpetter.se/project_sfxr.html) to HTML5 by Eric Fredricksen.
+Maintained by Chris McCormick.
+
+![jsfxr screenshot](screenshot.png)
+
+# Library
+
+You can use the jsxfr library to play sounds in your JavaScript game code.
+
+## Node
+
+Install it:
+
+```
+npm i chr15m/jsfxr
+```
+
+Require it:
+
+```
+const SoundEffect = require("jsfxr").SoundEffect;
+```
+
+See [API](#API) below for usage examples.
+
+## Browser
 
 Include the scripts in your page:
 
-        <script src="https://sfxr.me/riffwave.js"></script>
-        
-        <script src="https://sfxr.me/sfxr.js"></script>
+```
+<script src="https://sfxr.me/riffwave.js"></script>
+<script src="https://sfxr.me/sfxr.js"></script>
+```
+
+## API
 
 Once you find a nice sound, click the Serialize button and copy the JSON code for the sound::
 
@@ -27,7 +51,7 @@ Once you find a nice sound, click the Serialize button and copy the JSON code fo
           "p_env_sustain": 0.31718502829007483,
           "p_env_punch": 0,
           "p_env_decay": 0.2718540993592685,
-          "p_base_freq": 0.26126191208337196,
+          "p_base_freq": 0.2612<F2>6191208337196,
           "p_freq_limit": 0,
           "p_freq_ramp": 0.43787689856926615,
           "p_freq_dramp": 0,
@@ -63,23 +87,20 @@ You can also access an array of samples if you want to use the WebAudio API to p
 
         console.log(s.buffer)
 
-There is example code for using the WebAudio API on lines 55_ and 81_ of the index.html_ file.
+You can find more example code for using the WebAudio API on lines 55 and 81 of the index.html file.
 
-.. _55: https://github.com/chr15m/jsfxr/blob/master/index.html#L55
-.. _81: https://github.com/chr15m/jsfxr/blob/master/index.html#L81
-.. _index.html: https://github.com/chr15m/jsfxr/blob/master/index.html
+* 55: https://github.com/chr15m/jsfxr/blob/master/index.html#L55
+* 81: https://github.com/chr15m/jsfxr/blob/master/index.html#L81
+* index.html: https://github.com/chr15m/jsfxr/blob/master/index.html
 
-Links
------
+# links
 
-Application:  http://github.grumdrig.com/jsfxr/
+* Application:  http://sfxr.me/
+* Source code:  https://github.com/chr15m/jsfxr/
 
-Source code:  https://github.com/grumdrig/jsfxr/
+# Thanks
 
-
-Thanks
-------
-
- riffwave.js: http://www.codebase.es/riffwave/
-
- jquery-ui:   http://jqueryui.com/
+* Dr. Petter for inventing sfxr.
+* Eric Fredricksen for creating this port.
+* riffwave.js: http://www.codebase.es/riffwave/
+* jquery-ui:   http://jqueryui.com/
