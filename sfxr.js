@@ -879,9 +879,9 @@ var _sfxr_getAudioFn = function(wave) {
   };
 };
 
-/*** conversions from 1k slider and to units ***/
+/*** conversions from slider value and to units ***/
 
-var convert1k = {
+var sliders = {
   p_env_attack:  function (v) { return v * v * 100000.0 },
   p_env_sustain: function (v) { return v * v * 100000.0 },
   p_env_punch:   function (v) { return v },
@@ -996,11 +996,13 @@ var units = {
 }(this, function(RIFFWAVE) {
   // module code here....
   return {
+    "sfxr": sfxr,
+    "convert": {
+      "sliders": sliders,
+      "units": units,
+    },
     "Params": Params,
     "SoundEffect": SoundEffect,
-    "sfxr": sfxr,
-    "convert1k": convert1k,
-    "units": units,
     "waveforms": {
       "SQUARE": SQUARE,
       "SAWTOOTH": SAWTOOTH,
