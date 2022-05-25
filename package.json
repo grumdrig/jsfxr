@@ -1,7 +1,7 @@
 {
-  "name": "@chr15m/jsfxr",
+  "name": "jsfxr",
   "version": "0.0.6",
-  "main": "jsfxr.js",
+  "main": "sfxr.js",
   "devDependencies": {
     "live-server": "^1.2.1"
   },
