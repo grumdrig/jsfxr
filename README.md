@@ -20,7 +20,7 @@ You can use the jsxfr library to generate and play sounds in your JavaScript gam
 Install it:
 
 ```
-npm i chr15m/jsfxr
+npm i jsfxr
 ```
 
 Require it:
