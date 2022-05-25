@@ -44,18 +44,24 @@ You can then directly use the `SoundEffect`, `Params` etc.
 
 ## API
 
-Generate a sound effect using parameter presets:
+Generate a sound effect using a preset algorithm.
 
 ```javascript
 const Params = require("jsfxr").Params;
+
+const preset = "pickupCoin";
+
 const p = new Params();
 p.sound_vol = SOUND_VOL;
 p.sample_rate = SAMPLE_RATE;
 p.sample_size = SAMPLE_SIZE;
-const sound = p["pickupCoin"]();
+const sound = p[preset]();
+
 const s = new SoundEffect(sound).generate();
 s.getAudio().play();
 ```
+
+Available presets are `pickupCoin`, `laserShoot`, `explosion`, `powerUp`, `hitHurt`, `jump`, `blipSelect`, `synth`, `tone`, `click`, and `random`.
 
 You can also use the interface at https://sfxr.me to find the sound you want and then get the sound definition.
 Click the "serialize" button and copy the JSON code for the sound you want.
