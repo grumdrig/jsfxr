@@ -1,7 +1,18 @@
 {
   "name": "jsfxr",
-  "version": "0.0.6",
+  "version": "1.0.0",
+  "description": "8-bit sound effects generator based on sfxr",
   "main": "sfxr.js",
+  "homepage": "https://github.com/chr15m/jsfxr",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chr15m/jsfxr.git",
+    "web": "https://github.com/chr15m/jsfxr"
+  },
+  "bugs": {
+    "url": "https://github.com/chr15m/jsfxr/issues/"
+  },
+  "keywords": ["sfxr", "jsfxr", "8-bit", "sfx", "sound effects", "synth", "8bit", "retro", "chiptune", "audio", "music", "sound", "game development"],
   "devDependencies": {
     "live-server": "^1.2.1"
   },
