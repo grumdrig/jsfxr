@@ -18,5 +18,7 @@
   },
   "scripts": {
     "serve": "live-server"
-  }
+  },
+  "files": ["sfxr.js", "riffwave.js", "UNLICENSE", "README.md", "sfxr-to-wav"],
+  "bin": {"sfxr-to-wav": "./sfxr-to-wav"}
 }
