@@ -361,7 +361,7 @@ Params.prototype.synth = function () {
   this.p_arp_speed = frnd(0.5) + 0.4;
   this.p_duty = frnd(1);
   this.p_duty_ramp = rnd(2) == 2 ? frnd(1) : 0;
-  this.p_lpf_freq = [1, frnd(1) * frnd(1)][rnd(1)];
+  this.p_lpf_freq = [1, 0.9 * frnd(1) * frnd(1) + 0.1][rnd(1)];
   this.p_lpf_ramp = rndr(-1, 1);
   this.p_lpf_resonance = frnd(1);
   this.p_hpf_freq = rnd(3) == 3 ? frnd(1) : 0;
