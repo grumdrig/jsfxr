@@ -925,8 +925,8 @@ var units = {
   p_env_punch:   function (v) { return '+' + (v * 100).toPrecision(4) + '%'},
   p_env_decay:   function (v) { return (v / 44100).toPrecision(4) + ' sec' },
   
-  p_base_freq:   function (v) { return 'Hz' },
-  p_freq_limit:  function (v) { return 'Hz' },
+  p_base_freq:   function (v) { return v.toPrecision(4) + 'Hz' },
+  p_freq_limit:  function (v) { return v.toPrecision(4) + 'Hz' },
   p_freq_ramp:   function (v) { 
     return (44100*Math.log(v)/Math.log(0.5)).toPrecision(4) + ' 8va/sec'; },
   p_freq_dramp:  function (v) { 
