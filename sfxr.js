@@ -473,7 +473,7 @@ sfxr.toBuffer = function(synthdef) {
 
 sfxr.toWebAudio = function(synthdef, audiocontext) {
   var sfx = new SoundEffect(synthdef);
-  var buffer = _sfxr_getNormalized(sfx.getRawBuffer()["buffer"], sfx.bitsPerChannel);
+  var buffer = sfx.getRawBuffer()["normalized"];
   if (audiocontext) {
     var buff = audiocontext.createBuffer(1, buffer.length, sfx.sampleRate);
     var nowBuffering = buff.getChannelData(0);
@@ -634,6 +634,7 @@ SoundEffect.prototype.getRawBuffer = function () {
   var num_clipped = 0;
 
   var buffer = [];
+  var normalized = [];
 
   var sample_sum = 0;
   var num_summed = 0;
@@ -776,6 +777,9 @@ SoundEffect.prototype.getRawBuffer = function () {
     sample = sample / OVERSAMPLING * masterVolume;
     sample *= this.gain;
 
+    // store the original normalized floating point sample
+    normalized.push(sample);
+
     if (this.bitsPerChannel === 8) {
       // Rescale [-1, 1) to [0, 256)
       sample = Math.floor((sample + 1) * 128);
@@ -804,6 +808,7 @@ SoundEffect.prototype.getRawBuffer = function () {
   
   return {
     "buffer": buffer,
+    "normalized": normalized,
     "clipped": num_clipped,
   }
 }
@@ -811,23 +816,13 @@ SoundEffect.prototype.getRawBuffer = function () {
 SoundEffect.prototype.generate = function() {
   var rendered = this.getRawBuffer();
   var wave = new RIFFWAVE();
-  var normalized = _sfxr_getNormalized(rendered.buffer, this.bitsPerChannel);
   wave.header.sampleRate = this.sampleRate;
   wave.header.bitsPerSample = this.bitsPerChannel;
   wave.Make(rendered.buffer);
   wave.clipping = rendered.clipped;
-  wave.buffer = normalized;
+  wave.buffer = rendered.normalized;
   wave.getAudio = _sfxr_getAudioFn(wave);
   return wave;
-}
-
-var _sfxr_getNormalized = function(buffer, bitsPerChannel) {
-  // normalize buffer
-  var normalized = new Float32Array(buffer.length);
-  for (var b=0; b<buffer.length; b++) {
-    normalized[b] = 2.0 * buffer[b] / pow(2, bitsPerChannel) - 1.0;
-  }
-  return normalized;
 }
 
 var _actx = null;
