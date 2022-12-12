@@ -156,6 +156,8 @@ var params_order = [
   "p_hpf_ramp"
 ];
 
+var params_signed = ["p_freq_ramp", "p_freq_dramp", "p_arp_mod", "p_duty_ramp", "p_pha_offset", "p_pha_ramp", "p_lpf_ramp", "p_hpf_ramp"];
+
 Params.prototype.toB58 = function() {
   var convert = [];
   for (var pi in params_order) {
