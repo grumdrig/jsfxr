@@ -2,7 +2,7 @@ Quick 'n' easy game sound effects generator.
 
 App 👉 https://sfxr.me
 
-[About](#about) | [Library](#library)
+[About](#about) | [Use as a library](#library) | [Jsfxr Pro](#jsfxr-pro)
 
 # About
 
