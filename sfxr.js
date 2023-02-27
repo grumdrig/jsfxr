@@ -1090,7 +1090,7 @@ var units = {
     // Now we're wrapping the factory and assigning the return
     // value to the root (window) and returning it as well to
     // the AMD loader.
-    define(["riffwave"], function(RIFFWAVE){
+    define(["./riffwave"], function(RIFFWAVE){
       return (root.jsfxr = factory(RIFFWAVE));
     });
   } else if(typeof module === "object" && module.exports) {
