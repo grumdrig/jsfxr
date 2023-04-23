@@ -1,6 +1,6 @@
 {
   "name": "jsfxr",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "8-bit sound effects generator based on sfxr",
   "main": "sfxr.js",
   "exports": [
